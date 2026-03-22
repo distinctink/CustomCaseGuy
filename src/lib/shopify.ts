@@ -1,7 +1,7 @@
 // Shopify Storefront API Integration
-// Uses the Storefront API from distinct.ink
+// Uses the Storefront API from customcaseguy.com
 
-const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN || 'distinct.ink'
+const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN || 'customcaseguy.com'
 const STOREFRONT_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN || ''
 
 const STOREFRONT_API_URL = `https://${SHOPIFY_DOMAIN}/api/2026-01/graphql.json`

@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
           <div className="rounded-3xl bg-charcoal border border-mid-gray/10 p-8 sm:p-12">
             <h3 className="font-display font-700 text-2xl text-white mb-4">Introduction</h3>
             <p className="text-light-gray font-body leading-relaxed mb-4">
-              CustomCaseGuy (&quot;Distinct Ink,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the website
+              CustomCaseGuy (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the website
               customcaseguy.com. This Privacy Policy explains how we collect, use, disclose, and safeguard
               your information when you visit our website or place an order with us.
             </p>
@@ -310,7 +310,7 @@ export default function PrivacyPolicyPage() {
                 </a>
               </p>
               <p>
-                <span className="text-white font-display font-600">Business Name:</span> CustomCaseGuy / Distinct Ink
+                <span className="text-white font-display font-600">Business Name:</span> CustomCaseGuy
               </p>
               <p>
                 <span className="text-white font-display font-600">Location:</span> Winter Park, FL / New York

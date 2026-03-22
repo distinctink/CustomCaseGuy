@@ -20,7 +20,7 @@ export default function TermsOfServicePage() {
           <div className="rounded-3xl bg-charcoal border border-mid-gray/10 p-8 sm:p-12">
             <h3 className="font-display font-700 text-2xl text-white mb-4">Acceptance of Terms</h3>
             <p className="text-light-gray font-body leading-relaxed mb-4">
-              Welcome to CustomCaseGuy, operated by Distinct Ink (&quot;we,&quot; &quot;us,&quot; or
+              Welcome to CustomCaseGuy (&quot;we,&quot; &quot;us,&quot; or
               &quot;our&quot;). By accessing or using our website at customcaseguy.com, placing an order,
               or using any of our services, you agree to be bound by these Terms of Service.
             </p>
@@ -42,7 +42,7 @@ export default function TermsOfServicePage() {
               <p>
                 <span className="text-hot-pink font-display font-700">Pre-Made Designs:</span> We offer a
                 catalog of pre-made designs that you can apply to your chosen case. These designs are the
-                intellectual property of CustomCaseGuy / Distinct Ink.
+                intellectual property of CustomCaseGuy.
               </p>
               <p>
                 <span className="text-hot-pink font-display font-700">Custom Designs:</span> You may
@@ -155,7 +155,7 @@ export default function TermsOfServicePage() {
               <p>
                 <span className="text-hot-pink font-display font-700">Our Content:</span> All content on
                 this website, including but not limited to designs, graphics, logos, text, images, and
-                software, is the property of CustomCaseGuy / Distinct Ink or its licensors and is
+                software, is the property of CustomCaseGuy or its licensors and is
                 protected by copyright, trademark, and other intellectual property laws. You may not
                 reproduce, distribute, or create derivative works from our content without written
                 permission.
@@ -212,7 +212,7 @@ export default function TermsOfServicePage() {
             <h3 className="font-display font-700 text-2xl text-white mb-4">Limitation of Liability</h3>
             <div className="space-y-3 text-light-gray font-body leading-relaxed">
               <p>
-                To the maximum extent permitted by law, CustomCaseGuy / Distinct Ink shall not be liable
+                To the maximum extent permitted by law, CustomCaseGuy shall not be liable
                 for any indirect, incidental, special, consequential, or punitive damages arising out of
                 or related to your use of our website or products.
               </p>
@@ -268,7 +268,7 @@ export default function TermsOfServicePage() {
                 </a>
               </p>
               <p>
-                <span className="text-white font-display font-600">Business Name:</span> CustomCaseGuy / Distinct Ink
+                <span className="text-white font-display font-600">Business Name:</span> CustomCaseGuy
               </p>
               <p>
                 <span className="text-white font-display font-600">Location:</span> Winter Park, FL / New York
