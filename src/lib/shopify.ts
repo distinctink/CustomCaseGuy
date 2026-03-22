@@ -2,9 +2,9 @@
 // Uses the Storefront API from distinct.ink
 
 const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN || 'distinct.ink'
-const STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_TOKEN || ''
+const STOREFRONT_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN || ''
 
-const STOREFRONT_API_URL = `https://${SHOPIFY_DOMAIN}/api/2024-01/graphql.json`
+const STOREFRONT_API_URL = `https://${SHOPIFY_DOMAIN}/api/2026-01/graphql.json`
 
 async function shopifyFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
   const response = await fetch(STOREFRONT_API_URL, {
