@@ -12,7 +12,7 @@ const OUTPUT_DIR = path.join(process.cwd(), 'public', 'images', 'designs', 'flor
 
 function buildPrompt(name, description, colors, style) {
   const colorList = colors.join(', ')
-  return `Create a phone case design artwork: ${description}
+  return `Create a contemporary phone case surface pattern design: ${description}
 
 Design name: "${name}"
 Colors: ${colorList}
@@ -20,17 +20,19 @@ Style: ${style}
 
 CRITICAL REQUIREMENTS:
 - Dimensions: tall rectangle (phone case proportions, approximately 1:2 ratio)
-- The design must go edge-to-edge with NO borders, NO margins, NO white space at edges
+- ABSOLUTELY NO borders, NO margins, NO frames, NO white space at edges — the artwork must bleed completely to ALL four edges of the canvas
+- The pattern/design must fill the ENTIRE canvas from edge to edge with zero padding
 - NO text, NO words, NO letters, NO numbers anywhere in the design
 - NO phone outline, NO case outline — just the flat artwork pattern
+- Modern graphic illustration style — bold saturated colors, clean confident rendering
+- NOT a traditional watercolor or vintage botanical painting — aim for a contemporary surface pattern design aesthetic (like Rifle Paper Co or Society6 trending artwork)
 - High resolution, print-ready quality, 300 DPI equivalent detail
-- sRGB color space
-- The pattern/design should fill the ENTIRE canvas completely`
+- sRGB color space`
 }
 
 const FLORAL_DESIGNS = [
   {
-    name: 'Rose Garden', slug: 'rose-garden', style: 'Lush painterly botanical illustration, rich and dramatic',
+    name: 'Rose Garden', slug: 'rose-garden', style: 'Modern graphic floral illustration, bold saturated colors, clean flat rendering, contemporary surface pattern design',
     colorways: [
       { cw: 'a', cwName: 'Midnight Rose', desc: 'Dense arrangement of large open roses, rose buds, and dark green leaves filling the entire canvas. Roses in deep crimson red, hot pink, and dusty rose shades. Dark green and emerald foliage with subtle gold accent leaves scattered throughout. Pure black background.', colors: ['#0A0A0A','#8B0000','#FF1F6E','#C48B9F','#1B4D3E','#2E8B57','#D4AF37'] },
       { cw: 'b', cwName: 'English Garden', desc: 'Dense arrangement of large open roses, rose buds, and sage green leaves filling the entire canvas. Roses in soft blush pink, cream white, and peach. Light sage green and olive foliage on a warm cream background.', colors: ['#FFF8F0','#FFB6C1','#FFFDD0','#FFDAB9','#9CAF88','#808000','#DEB887'] },
@@ -137,7 +139,7 @@ const FLORAL_DESIGNS = [
     ]
   },
   {
-    name: 'Vintage Rose', slug: 'vintage-rose', style: 'Vintage Victorian wallpaper pattern, aged and romantic',
+    name: 'Vintage Rose', slug: 'vintage-rose', style: 'Modern romantic floral pattern, stylized and contemporary with a nod to classic roses',
     colorways: [
       { cw: 'a', cwName: 'Antique', desc: 'Repeating vintage rose pattern like Victorian wallpaper or chintz fabric. Medium-sized roses with buds and ribbons arranged in a classic repeating layout. Muted dusty pink, sage green, and antique gold on an aged cream background.', colors: ['#F5E6D3','#C48B9F','#BC8F8F','#9CAF88','#D4AF37','#8B7355'] },
     ]

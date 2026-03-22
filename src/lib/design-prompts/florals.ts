@@ -6,7 +6,7 @@ export const FLORAL_DESIGNS = [
     name: 'Rose Garden',
     slug: 'rose-garden',
     collectionId: 'florals',
-    style: 'Lush painterly botanical illustration, rich and dramatic',
+    style: 'Modern graphic floral illustration, bold saturated colors, clean flat rendering, contemporary surface pattern design',
     colorways: [
       {
         colorway: 'a',
@@ -296,7 +296,7 @@ export const FLORAL_DESIGNS = [
     name: 'Vintage Rose',
     slug: 'vintage-rose',
     collectionId: 'florals',
-    style: 'Vintage Victorian wallpaper pattern, aged and romantic',
+    style: 'Modern romantic floral pattern, stylized and contemporary with a nod to classic roses',
     colorways: [
       {
         colorway: 'a',
