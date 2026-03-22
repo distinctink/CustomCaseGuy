@@ -33,7 +33,7 @@ const PATHS = [
   {
     title: 'Start From Scratch',
     description:
-      'Upload your own image, add text, pick fonts and colors. Our live editor lets you design a truly one-of-a-kind case.',
+      'Upload your own image, add text, pick fonts and colors. See it on your case instantly. Make something nobody else has.',
     cta: 'Open Editor',
     href: '/design-editor',
     icon: (

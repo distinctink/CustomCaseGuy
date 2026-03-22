@@ -155,7 +155,7 @@ export default function DesignDetailPage({
                 Want to customize this design?
               </h3>
               <p className="text-light-gray text-sm font-body mb-4">
-                Add your name, change colors, or layer it with other elements in our live editor.
+                Add your name, change colors, or make it completely your own.
               </p>
               <Button href="/design-editor" variant="outline" size="sm">
                 Open in Editor

@@ -32,7 +32,7 @@ export function HeroSection() {
 
             <p className="mt-6 text-light-gray text-lg sm:text-xl font-body font-300 max-w-lg leading-relaxed">
               Custom-printed on genuine OtterBox and premium cases.
-              Choose from 400+ designs or create your own with our live editor.
+              Choose from 400+ designs or create something completely your own.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">

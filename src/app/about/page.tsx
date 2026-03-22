@@ -57,7 +57,7 @@ export default function AboutPage() {
             <div className="space-y-4 text-light-gray font-body leading-relaxed">
               <p>
                 <span className="text-hot-pink font-display font-700">1. You design.</span> Pick from 400+
-                pre-made designs or create your own using our live WYSIWYG editor.
+                pre-made designs or create your own with our built-in design tool.
               </p>
               <p>
                 <span className="text-hot-pink font-display font-700">2. We print.</span> Your design is
