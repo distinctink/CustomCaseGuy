@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&display=swap');
+
+/* ============================================
+   CustomCaseGuy Design System
+   ============================================ */
+
+@theme {
+  /* Brand Colors */
+  --color-primary-black: #0A0A0A;
+  --color-charcoal: #1A1A1A;
+  --color-dark-gray: #2A2A2A;
+  --color-mid-gray: #444444;
+  --color-light-gray: #999999;
+  --color-white: #FFFFFF;
+  --color-hot-pink: #FF1F6E;
+  --color-soft-pink: #FF6B9D;
+  --color-warm-pink: #FFB3CC;
+
+  /* Semantic aliases */
+  --color-accent: #FF1F6E;
+  --color-accent-soft: #FF6B9D;
+  --color-accent-warm: #FFB3CC;
+  --color-bg-primary: #0A0A0A;
+  --color-bg-card: #1A1A1A;
+  --color-bg-input: #2A2A2A;
+  --color-border: #444444;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #999999;
+  --color-text-muted: #444444;
+
+  /* Font families */
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+
+  /* Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 6s ease-in-out 2s infinite;
+  --animate-float-slow: float 8s ease-in-out 1s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Headings use display font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-mid-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-light-gray);
+}
+
+/* Selection color */
+::selection {
+  background-color: color-mix(in srgb, var(--color-hot-pink) 30%, transparent);
+  color: var(--color-white);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible styles */
+*:focus-visible {
+  outline: 2px solid var(--color-hot-pink);
+  outline-offset: 2px;
+}
