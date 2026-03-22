@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { CASE_TYPES, DEVICES } from '@/lib/constants'
 import { Button } from '@/components/ui/Button'
 
-type EditorTab = 'text' | 'upload' | 'shapes' | 'background'
+type EditorTab = 'ai' | 'text' | 'upload' | 'shapes' | 'background'
 
 // Google Fonts organized by style for easy browsing
 const FONT_CATEGORIES = [
@@ -93,6 +93,22 @@ const BASIC_SHAPES = [
   { name: 'Diamond', icon: '◇' },
   { name: 'Line', icon: '—' },
   { name: 'Arrow', icon: '→' },
+]
+
+// AI Style presets for quick generation
+const AI_STYLE_PRESETS = [
+  { id: 'vibrant-floral', label: 'Florals', emoji: '🌹' },
+  { id: 'dark-marble', label: 'Marble', emoji: '🪨' },
+  { id: 'galaxy', label: 'Galaxy', emoji: '🌌' },
+  { id: 'watercolor', label: 'Watercolor', emoji: '🎨' },
+  { id: 'geometric', label: 'Geometric', emoji: '🔷' },
+  { id: 'tropical', label: 'Tropical', emoji: '🌴' },
+  { id: 'abstract', label: 'Abstract', emoji: '🖼' },
+  { id: 'vintage', label: 'Vintage', emoji: '📻' },
+  { id: 'tie-dye', label: 'Tie-Dye', emoji: '🌀' },
+  { id: 'animal-print', label: 'Animal', emoji: '🐆' },
+  { id: 'landscape', label: 'Landscape', emoji: '🏔' },
+  { id: 'gradient', label: 'Gradient', emoji: '🌅' },
 ]
 
 // Banner & frame shapes for monograms/names
@@ -238,6 +254,12 @@ export default function DesignEditorPage() {
   const [selectedBanner, setSelectedBanner] = useState<number | null>(null)
   const [bannerColor, setBannerColor] = useState('#D4AF37')
   const [shapesSubTab, setShapesSubTab] = useState<'basic' | 'banners'>('banners')
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiPreset, setAiPreset] = useState<string | null>(null)
+  const [aiImage, setAiImage] = useState<string | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiGenerations, setAiGenerations] = useState(0)
 
   const caseType = CASE_TYPES.find((c) => c.id === selectedCase)!
   const phoneCases = CASE_TYPES.filter((c) => c.id !== 'ipad-defender')
@@ -252,6 +274,30 @@ export default function DesignEditorPage() {
     return () => { document.head.removeChild(link) }
   }, [selectedFont])
 
+  const handleGenerateAI = async () => {
+    if (!aiPrompt.trim() && !aiPreset) return
+    setAiLoading(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/generate-ai-design', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: aiPrompt.trim(),
+          preset: aiPreset,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Generation failed')
+      setAiImage(data.image)
+      setAiGenerations((g) => g + 1)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   const handleAddToCart = () => {
     alert(`Custom design added to cart!\n${caseType.name} for ${DEVICES.find((d) => d.id === selectedDevice)?.name}\n$${caseType.price.toFixed(2)}`)
   }
@@ -262,6 +308,11 @@ export default function DesignEditorPage() {
     : FONT_CATEGORIES[activeFontCategory].fonts
 
   const tabs: { id: EditorTab; label: string; icon: React.ReactNode }[] = [
+    {
+      id: 'ai',
+      label: 'AI',
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>,
+    },
     {
       id: 'text',
       label: 'Text',
@@ -321,7 +372,7 @@ export default function DesignEditorPage() {
         <div className="lg:w-80 bg-charcoal border-r border-mid-gray/20 flex flex-col">
           {/* Tab buttons */}
           <div className="flex lg:flex-col border-b lg:border-b-0 border-mid-gray/20">
-            <div className="flex lg:grid lg:grid-cols-4 w-full">
+            <div className="flex lg:grid lg:grid-cols-5 w-full">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -341,6 +392,133 @@ export default function DesignEditorPage() {
 
           {/* Tab content */}
           <div className="flex-1 p-4 overflow-y-auto">
+            {/* ============ AI DESIGN TAB ============ */}
+            {activeTab === 'ai' && (
+              <div className="space-y-4">
+                {/* Sparkle header */}
+                <div className="bg-gradient-to-r from-hot-pink/20 via-purple-500/20 to-cyan-400/20 rounded-xl p-3 border border-hot-pink/20">
+                  <p className="text-sm font-display font-600 text-white">
+                    AI Case Designer
+                  </p>
+                  <p className="text-xs text-light-gray font-body mt-0.5">
+                    Describe your dream design and AI will create it instantly.
+                  </p>
+                </div>
+
+                {/* Style presets */}
+                <div>
+                  <label className="block text-xs text-light-gray font-display font-600 mb-2">
+                    Quick Styles
+                  </label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {AI_STYLE_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        onClick={() => setAiPreset(aiPreset === preset.id ? null : preset.id)}
+                        className={`py-2 px-2 rounded-lg text-xs font-display font-600 transition-all cursor-pointer ${
+                          aiPreset === preset.id
+                            ? 'bg-hot-pink text-white shadow-lg shadow-hot-pink/20'
+                            : 'bg-dark-gray text-light-gray hover:text-white hover:bg-dark-gray/80'
+                        }`}
+                      >
+                        <span className="mr-1">{preset.emoji}</span>
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom prompt */}
+                <div>
+                  <label className="block text-xs text-light-gray font-display font-600 mb-2">
+                    {aiPreset ? 'Add Details (optional)' : 'Describe Your Design'}
+                  </label>
+                  <textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder={aiPreset
+                      ? 'Add custom details... e.g. "with gold accents and dark background"'
+                      : 'e.g. "pink cherry blossoms on a dark blue background with gold sparkles"'
+                    }
+                    rows={3}
+                    maxLength={500}
+                    className="w-full bg-dark-gray text-white text-sm rounded-xl px-4 py-3 border border-mid-gray/20 font-body placeholder:text-mid-gray focus:border-hot-pink focus:outline-none resize-none"
+                  />
+                  <p className="text-xs text-mid-gray font-body mt-1 text-right">
+                    {aiPrompt.length}/500
+                  </p>
+                </div>
+
+                {/* Generate button */}
+                <button
+                  onClick={handleGenerateAI}
+                  disabled={aiLoading || (!aiPrompt.trim() && !aiPreset)}
+                  className={`w-full py-3 rounded-xl font-display font-700 text-sm transition-all cursor-pointer ${
+                    aiLoading
+                      ? 'bg-mid-gray/30 text-mid-gray cursor-wait'
+                      : !aiPrompt.trim() && !aiPreset
+                        ? 'bg-mid-gray/20 text-mid-gray cursor-not-allowed'
+                        : 'bg-gradient-to-r from-hot-pink to-purple-500 text-white hover:shadow-lg hover:shadow-hot-pink/30 active:scale-[0.98]'
+                  }`}
+                >
+                  {aiLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Creating your design...
+                    </span>
+                  ) : (
+                    `Generate Design${aiGenerations > 0 ? ' Again' : ''}`
+                  )}
+                </button>
+
+                {/* Error message */}
+                {aiError && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                    <p className="text-red-400 text-xs font-body">{aiError}</p>
+                  </div>
+                )}
+
+                {/* Generated count */}
+                {aiGenerations > 0 && (
+                  <p className="text-xs text-mid-gray font-body text-center">
+                    {aiGenerations} design{aiGenerations !== 1 ? 's' : ''} generated this session
+                  </p>
+                )}
+
+                {/* AI image thumbnail (if generated) */}
+                {aiImage && (
+                  <div>
+                    <label className="block text-xs text-light-gray font-display font-600 mb-2">
+                      Generated Design
+                    </label>
+                    <div className="rounded-xl overflow-hidden border border-mid-gray/20">
+                      <img src={aiImage} alt="AI generated design" className="w-full" />
+                    </div>
+                    <button
+                      onClick={() => { setAiImage(null); setAiPrompt(''); setAiPreset(null) }}
+                      className="w-full mt-2 py-2 rounded-lg bg-dark-gray text-light-gray text-xs font-display font-600 hover:text-white transition-colors cursor-pointer"
+                    >
+                      Clear & Start Over
+                    </button>
+                  </div>
+                )}
+
+                {/* Tips */}
+                <div className="bg-dark-gray/50 rounded-xl p-3 space-y-1.5">
+                  <p className="text-xs text-light-gray font-display font-600">Tips for best results:</p>
+                  <ul className="text-xs text-mid-gray font-body space-y-1 list-disc list-inside">
+                    <li>Mention specific colors you want</li>
+                    <li>Describe the mood: bold, subtle, elegant, fun</li>
+                    <li>Reference styles: watercolor, minimalist, retro</li>
+                    <li>Pick a preset, then customize with your details</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
             {/* ============ TEXT TAB ============ */}
             {activeTab === 'text' && (
               <div className="space-y-4">
@@ -652,9 +830,18 @@ export default function DesignEditorPage() {
               className="w-[280px] h-[560px] sm:w-[320px] sm:h-[640px] rounded-[2.5rem] border-2 border-mid-gray/30 shadow-2xl overflow-hidden transition-colors relative"
               style={{ backgroundColor: bgColor }}
             >
+              {/* AI generated image background */}
+              {aiImage && (
+                <img
+                  src={aiImage}
+                  alt="AI generated design"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+
               {/* Banner/frame overlay */}
               {selectedBanner !== null && (
-                <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none z-[5]">
                   <div className="w-full h-full max-w-[240px] max-h-[240px]">
                     {BANNER_SHAPES[selectedBanner].svg(bannerColor)}
                   </div>
@@ -677,7 +864,21 @@ export default function DesignEditorPage() {
                 </div>
               )}
 
-              {!textInput && selectedBanner === null && (
+              {/* AI loading spinner on canvas */}
+              {aiLoading && (
+                <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/60">
+                  <div className="text-center">
+                    <svg className="animate-spin h-10 w-10 text-hot-pink mx-auto mb-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    <p className="text-white text-sm font-display font-600">Generating...</p>
+                    <p className="text-mid-gray text-xs font-body mt-1">This takes a few seconds</p>
+                  </div>
+                </div>
+              )}
+
+              {!textInput && !aiImage && selectedBanner === null && !aiLoading && (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-mid-gray text-sm font-body text-center px-8">
                     Your design will appear here
@@ -701,6 +902,10 @@ export default function DesignEditorPage() {
               className="w-full h-full flex items-center justify-center p-2 relative"
               style={{ backgroundColor: bgColor }}
             >
+              {/* AI image mini preview */}
+              {aiImage && (
+                <img src={aiImage} alt="AI design preview" className="absolute inset-0 w-full h-full object-cover" />
+              )}
               {/* Mini banner preview */}
               {selectedBanner !== null && (
                 <div className="absolute inset-0 flex items-center justify-center p-3 pointer-events-none">
