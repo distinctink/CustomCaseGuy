@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
             <h3 className="font-display font-700 text-2xl text-white mb-4">Introduction</h3>
             <p className="text-light-gray font-body leading-relaxed mb-4">
               CustomCaseGuy (&quot;Distinct Ink,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the website
-              distinctink.com. This Privacy Policy explains how we collect, use, disclose, and safeguard
+              customcaseguy.com. This Privacy Policy explains how we collect, use, disclose, and safeguard
               your information when you visit our website or place an order with us.
             </p>
             <p className="text-light-gray font-body leading-relaxed">
@@ -224,8 +224,8 @@ export default function PrivacyPolicyPage() {
             </div>
             <p className="text-light-gray font-body leading-relaxed mt-4">
               To exercise any of these rights, please contact us at{' '}
-              <a href="mailto:hello@distinctink.com" className="text-hot-pink underline hover:no-underline">
-                hello@distinctink.com
+              <a href="mailto:info@customcaseguy.com" className="text-hot-pink underline hover:no-underline">
+                info@customcaseguy.com
               </a>. We will respond to your request within 30 days.
             </p>
           </div>
@@ -269,8 +269,8 @@ export default function PrivacyPolicyPage() {
               personal data from a child under 13 without parental consent, we will take steps to delete
               that information as quickly as possible. If you believe we have collected information from
               a child under 13, please contact us at{' '}
-              <a href="mailto:hello@distinctink.com" className="text-hot-pink underline hover:no-underline">
-                hello@distinctink.com
+              <a href="mailto:info@customcaseguy.com" className="text-hot-pink underline hover:no-underline">
+                info@customcaseguy.com
               </a>.
             </p>
           </div>
@@ -299,14 +299,14 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-2 text-light-gray font-body leading-relaxed">
               <p>
                 <span className="text-white font-display font-600">Email:</span>{' '}
-                <a href="mailto:hello@distinctink.com" className="text-hot-pink underline hover:no-underline">
-                  hello@distinctink.com
+                <a href="mailto:info@customcaseguy.com" className="text-hot-pink underline hover:no-underline">
+                  info@customcaseguy.com
                 </a>
               </p>
               <p>
                 <span className="text-white font-display font-600">Website:</span>{' '}
-                <a href="https://distinctink.com" className="text-hot-pink underline hover:no-underline" target="_blank" rel="noopener noreferrer">
-                  distinctink.com
+                <a href="https://customcaseguy.com" className="text-hot-pink underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+                  customcaseguy.com
                 </a>
               </p>
               <p>

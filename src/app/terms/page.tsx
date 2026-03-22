@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
             <h3 className="font-display font-700 text-2xl text-white mb-4">Acceptance of Terms</h3>
             <p className="text-light-gray font-body leading-relaxed mb-4">
               Welcome to CustomCaseGuy, operated by Distinct Ink (&quot;we,&quot; &quot;us,&quot; or
-              &quot;our&quot;). By accessing or using our website at distinctink.com, placing an order,
+              &quot;our&quot;). By accessing or using our website at customcaseguy.com, placing an order,
               or using any of our services, you agree to be bound by these Terms of Service.
             </p>
             <p className="text-light-gray font-body leading-relaxed">
@@ -139,8 +139,8 @@ export default function TermsOfServicePage() {
               <p>
                 <span className="text-hot-pink font-display font-700">How to Request a Return:</span> Contact
                 us at{' '}
-                <a href="mailto:hello@distinctink.com" className="text-hot-pink underline hover:no-underline">
-                  hello@distinctink.com
+                <a href="mailto:info@customcaseguy.com" className="text-hot-pink underline hover:no-underline">
+                  info@customcaseguy.com
                 </a>{' '}
                 with your order number and photos of the issue. We aim to resolve all claims within 5
                 business days.
@@ -257,14 +257,14 @@ export default function TermsOfServicePage() {
             <div className="space-y-2 text-light-gray font-body leading-relaxed">
               <p>
                 <span className="text-white font-display font-600">Email:</span>{' '}
-                <a href="mailto:hello@distinctink.com" className="text-hot-pink underline hover:no-underline">
-                  hello@distinctink.com
+                <a href="mailto:info@customcaseguy.com" className="text-hot-pink underline hover:no-underline">
+                  info@customcaseguy.com
                 </a>
               </p>
               <p>
                 <span className="text-white font-display font-600">Website:</span>{' '}
-                <a href="https://distinctink.com" className="text-hot-pink underline hover:no-underline" target="_blank" rel="noopener noreferrer">
-                  distinctink.com
+                <a href="https://customcaseguy.com" className="text-hot-pink underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+                  customcaseguy.com
                 </a>
               </p>
               <p>

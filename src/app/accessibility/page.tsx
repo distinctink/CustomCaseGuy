@@ -137,10 +137,10 @@ export default function AccessibilityPage() {
               <p className="text-white font-body">
                 <strong className="font-display font-600">Email:</strong>{' '}
                 <a
-                  href="mailto:hello@distinctink.com"
+                  href="mailto:info@customcaseguy.com"
                   className="text-hot-pink hover:underline"
                 >
-                  hello@distinctink.com
+                  info@customcaseguy.com
                 </a>
               </p>
               <p className="text-white font-body">
