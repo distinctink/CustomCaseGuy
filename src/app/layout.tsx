@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s | CustomCaseGuy',
   },
   description:
-    'Custom-printed phone cases made in Orlando. UV printed on genuine OtterBox, MagSafe, and clear cases. Design your own or choose from 400+ designs.',
+    'Custom-printed phone cases designed & printed in the USA. Printed on genuine OtterBox, MagSafe, and clear cases. Design your own or choose from 400+ designs.',
   keywords: [
     'custom phone case',
     'OtterBox custom',

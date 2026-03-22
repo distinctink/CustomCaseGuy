@@ -2,8 +2,8 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 
 const FEATURES = [
   {
-    title: 'UV Printed In-House',
-    description: 'Every case is UV printed at our Orlando studio with vibrant, scratch-resistant ink that lasts.',
+    title: 'Printed In-House',
+    description: 'Every case is UV printed & sublimated at our US studios with vibrant, scratch-resistant ink that lasts.',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
   },
   {
@@ -27,8 +27,8 @@ const FEATURES = [
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg>,
   },
   {
-    title: 'Made in USA',
-    description: 'Designed and produced in Orlando, Florida. Not dropshipped from overseas. Quality you can see.',
+    title: 'Designed & Printed in the USA',
+    description: 'Designed and printed in Florida & New York. Not dropshipped from overseas. Quality you can see.',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>,
   },
 ]

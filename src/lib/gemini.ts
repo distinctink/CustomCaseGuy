@@ -105,7 +105,7 @@ export const SITE_GRAPHIC_PROMPTS = {
     filename: 'cta-mini-cases.jpg',
   },
   'about-workshop': {
-    prompt: `Interior of a professional UV printing workshop studio. A commercial UV flatbed printer is printing a colorful design onto a phone case. Clean modern workspace in Orlando Florida, well-lit with warm industrial lighting. Organized workbenches with phone cases and equipment. Professional manufacturing environment, 8K quality, photorealistic.`,
+    prompt: `Interior of a professional printing workshop studio. A commercial UV flatbed printer is printing a colorful design onto a phone case. Clean modern workspace, well-lit with warm industrial lighting. Organized workbenches with phone cases and equipment. Professional manufacturing environment, 8K quality, photorealistic.`,
     width: 1920,
     height: 1080,
     filename: 'about-workshop.jpg',

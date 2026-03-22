@@ -34,7 +34,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <Logo />
             <p className="mt-4 text-light-gray text-sm font-body leading-relaxed">
-              Custom-printed phone cases made in Orlando, FL. UV printed in-house
+              Custom-printed phone cases designed & printed in the USA. Printed in-house
               on genuine OtterBox and premium cases. 12+ years, 400K+ products sold.
             </p>
             <div className="flex gap-4 mt-6">
@@ -111,10 +111,10 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 pt-8 border-t border-mid-gray/20 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-mid-gray text-xs">
-            &copy; {new Date().getFullYear()} CustomCaseGuy. All rights reserved. Made with love in Orlando, FL.
+            &copy; {new Date().getFullYear()} CustomCaseGuy. All rights reserved. Designed &amp; printed in the USA.
           </p>
           <p className="text-mid-gray text-xs">
-            UV printed in-house on genuine cases.
+            Printed in-house on genuine cases.
           </p>
         </div>
       </div>

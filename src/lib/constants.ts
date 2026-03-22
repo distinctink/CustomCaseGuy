@@ -143,7 +143,7 @@ export const SEASONAL_WINDOWS = {
 
 // Trust bar items
 export const TRUST_ITEMS = [
-  { label: 'Made in Orlando', icon: 'map-pin' },
+  { label: 'Designed & Printed in the USA', icon: 'map-pin' },
   { label: 'Free Shipping', icon: 'truck' },
   { label: '24-48hr Turnaround', icon: 'clock' },
   { label: 'Genuine OtterBox', icon: 'shield-check' },

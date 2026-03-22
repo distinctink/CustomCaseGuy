@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'CustomCaseGuy — Custom phone cases made in Orlando, FL. 12+ years, 400K+ products sold. Meet the team behind your favorite cases.',
+  description: 'CustomCaseGuy — Custom phone cases designed & printed in the USA. 12+ years, 400K+ products sold. Meet the team behind your favorite cases.',
 }
 
 export default function AboutPage() {
@@ -13,7 +13,7 @@ export default function AboutPage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           title="About CustomCaseGuy"
-          subtitle="Made with love in Orlando, Florida"
+          subtitle="Designed & printed in the USA"
         />
 
         <div className="prose prose-invert max-w-none space-y-8">
@@ -26,8 +26,8 @@ export default function AboutPage() {
               our own site.
             </p>
             <p className="text-light-gray font-body leading-relaxed">
-              We&apos;re not a faceless dropshipper. Every single case is UV printed in-house at our studio in
-              Orlando, Florida using commercial-grade UV printers. We print on genuine OtterBox cases
+              We&apos;re not a faceless dropshipper. Every single case is UV printed &amp; sublimated in-house at our US studios
+              using commercial-grade printers. We print on genuine OtterBox cases
               (Symmetry, Commuter, Defender) and premium clear and MagSafe cases. When you order from us,
               your case is made by real people who care about quality.
             </p>
@@ -46,7 +46,7 @@ export default function AboutPage() {
               <h3 className="font-display font-700 text-xl text-white mb-2">Adam</h3>
               <p className="text-hot-pink text-sm font-display font-600 mb-3">Production & Shipping</p>
               <p className="text-light-gray text-sm font-body leading-relaxed">
-                Handles production, shipping, and customer service from our Orlando studio.
+                Handles production, shipping, and customer service from our US studios.
                 Makes sure every case goes out perfect.
               </p>
             </div>
@@ -61,7 +61,7 @@ export default function AboutPage() {
               </p>
               <p>
                 <span className="text-hot-pink font-display font-700">2. We print.</span> Your design is
-                UV printed directly onto a genuine case using commercial-grade UV printers with vibrant,
+                UV printed &amp; sublimated directly onto a genuine case using commercial-grade printers with vibrant,
                 scratch-resistant ink.
               </p>
               <p>

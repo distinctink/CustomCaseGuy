@@ -227,7 +227,7 @@ export default function ProductPage({
             {/* Trust features */}
             <div className="space-y-3">
               {[
-                { icon: '☀️', text: 'UV printed in-house in Orlando, FL' },
+                { icon: '☀️', text: 'Printed in-house in the USA' },
                 { icon: '📦', text: 'Free shipping on all U.S. orders' },
                 { icon: '🛡️', text: `Genuine ${caseType.name.includes('OtterBox') ? 'OtterBox' : 'premium'} case` },
                 { icon: '⚡', text: 'Ships within 24-48 hours' },

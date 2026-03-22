@@ -18,7 +18,7 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 bg-dark-gray/80 border border-mid-gray/20 rounded-full px-4 py-2 mb-8">
               <span className="w-2 h-2 rounded-full bg-hot-pink animate-pulse" />
               <span className="text-light-gray text-sm font-body">
-                UV Printed In-House in Orlando, FL
+                Printed In-House in the USA
               </span>
             </div>
 

@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: 'Where are you located?',
-    a: 'We\'re based in Orlando/Winter Park, Florida. Every case is printed in-house at our Orlando studio — we don\'t outsource or dropship.',
+    a: 'We\'re based in Orlando/Winter Park, Florida and New York. Every case is printed in-house at our US studios — we don\'t outsource or dropship.',
   },
 ]
 

@@ -14,7 +14,7 @@ export function ProductLines() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           title="Our Case Lineup"
-          subtitle="Every case is UV printed in-house at our Orlando studio"
+          subtitle="Every case is printed in-house at our US studios"
         />
 
         {/* Tabs */}
@@ -68,7 +68,7 @@ export function ProductLines() {
 
             <div className="space-y-3">
               {[
-                'UV printed with vibrant, scratch-resistant ink',
+                'UV printed & sublimated with vibrant, scratch-resistant ink',
                 'Precise cutouts for all ports and buttons',
                 'Wireless charging compatible',
                 'Ships within 24-48 hours',
