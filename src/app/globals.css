@@ -10,7 +10,7 @@
   --color-primary-black: #0A0A0A;
   --color-charcoal: #1A1A1A;
   --color-dark-gray: #2A2A2A;
-  --color-mid-gray: #444444;
+  --color-mid-gray: #666666;
   --color-light-gray: #999999;
   --color-white: #FFFFFF;
   --color-hot-pink: #FF1F6E;
@@ -27,7 +27,7 @@
   --color-border: #444444;
   --color-text-primary: #FFFFFF;
   --color-text-secondary: #999999;
-  --color-text-muted: #444444;
+  --color-text-muted: #777777;
 
   /* Font families */
   --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;

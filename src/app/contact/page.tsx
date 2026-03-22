@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [formData, setFormData] = useState({ name: '', email: '', message: '', consent: false })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     alert('Message sent! We\'ll get back to you within 24 hours.')
-    setFormData({ name: '', email: '', message: '' })
+    setFormData({ name: '', email: '', message: '', consent: false })
   }
 
   return (
@@ -63,6 +63,23 @@ export default function ContactPage() {
                 className="w-full bg-dark-gray text-white text-sm rounded-xl px-4 py-3 border border-mid-gray/20 font-body placeholder:text-mid-gray focus:border-hot-pink focus:outline-none resize-none"
                 placeholder="How can we help?"
               />
+            </div>
+
+            <div>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  required
+                  checked={formData.consent}
+                  onChange={(e) => setFormData((p) => ({ ...p, consent: e.target.checked }))}
+                  className="mt-1 w-4 h-4 accent-hot-pink rounded cursor-pointer flex-shrink-0"
+                />
+                <span className="text-light-gray text-xs font-body leading-relaxed">
+                  I agree that my data will be used to respond to my inquiry. See our{' '}
+                  <a href="/privacy" className="text-hot-pink hover:underline">Privacy Policy</a>{' '}
+                  for how we handle your data. You can request deletion at any time.
+                </span>
+              </label>
             </div>
 
             <Button type="submit" fullWidth size="lg">

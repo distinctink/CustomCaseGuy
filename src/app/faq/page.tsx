@@ -64,9 +64,11 @@ export default function FaqPage() {
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                aria-expanded={openIndex === i}
+                aria-controls={`faq-answer-${i}`}
                 className="w-full flex items-center justify-between p-6 text-left cursor-pointer"
               >
-                <span className="font-display font-700 text-white pr-4">
+                <span id={`faq-question-${i}`} className="font-display font-700 text-white pr-4">
                   {faq.q}
                 </span>
                 <svg
@@ -87,7 +89,7 @@ export default function FaqPage() {
                 </svg>
               </button>
               {openIndex === i && (
-                <div className="px-6 pb-6 -mt-2">
+                <div id={`faq-answer-${i}`} role="region" aria-labelledby={`faq-question-${i}`} className="px-6 pb-6 -mt-2">
                   <p className="text-light-gray text-sm font-body leading-relaxed">
                     {faq.a}
                   </p>

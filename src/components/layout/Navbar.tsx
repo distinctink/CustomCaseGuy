@@ -16,6 +16,13 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary-black/90 backdrop-blur-md border-b border-mid-gray/20">
+      {/* Skip to content link for keyboard/screen reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:bg-hot-pink focus:text-white focus:rounded-lg focus:font-display focus:font-600 focus:text-sm"
+      >
+        Skip to main content
+      </a>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -88,7 +95,8 @@ export function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              aria-label="Toggle menu"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
               className="md:hidden text-light-gray hover:text-white transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
             >

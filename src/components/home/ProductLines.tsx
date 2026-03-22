@@ -18,10 +18,13 @@ export function ProductLines() {
         />
 
         {/* Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
+        <div className="flex flex-wrap justify-center gap-2 mb-12" role="tablist" aria-label="Case types">
           {phoneCases.map((caseType, i) => (
             <button
               key={caseType.id}
+              role="tab"
+              aria-selected={i === activeTab}
+              aria-label={caseType.name}
               onClick={() => setActiveTab(i)}
               className={`px-5 py-2.5 rounded-xl font-display font-600 text-sm transition-all duration-200 cursor-pointer ${
                 i === activeTab

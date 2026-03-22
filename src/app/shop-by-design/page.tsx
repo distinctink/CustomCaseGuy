@@ -28,9 +28,10 @@ export default function ShopByDesignPage() {
         />
 
         {/* Collection filter bar */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-8" role="group" aria-label="Filter by collection">
           <button
             onClick={() => setSelectedCollection(null)}
+            aria-pressed={!selectedCollection}
             className={`px-4 py-2 rounded-xl text-sm font-display font-600 transition-all cursor-pointer ${
               !selectedCollection
                 ? 'bg-hot-pink text-white'
@@ -43,13 +44,14 @@ export default function ShopByDesignPage() {
             <button
               key={col.id}
               onClick={() => setSelectedCollection(col.id)}
+              aria-pressed={selectedCollection === col.id}
               className={`px-4 py-2 rounded-xl text-sm font-display font-600 transition-all cursor-pointer ${
                 selectedCollection === col.id
                   ? 'bg-hot-pink text-white'
                   : 'bg-dark-gray text-light-gray hover:text-white'
               }`}
             >
-              {col.icon} {col.name.split(' & ')[0]}
+              <span aria-hidden="true">{col.icon}</span> {col.name.split(' & ')[0]}
             </button>
           ))}
         </div>
@@ -59,7 +61,9 @@ export default function ShopByDesignPage() {
           <p className="text-light-gray text-sm font-body">
             {designs.length} design{designs.length !== 1 ? 's' : ''}
           </p>
+          <label htmlFor="sort-designs" className="sr-only">Sort designs</label>
           <select
+            id="sort-designs"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="bg-dark-gray text-light-gray text-sm rounded-xl px-4 py-2 border border-mid-gray/20 font-body cursor-pointer"
