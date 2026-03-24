@@ -87,7 +87,7 @@ export function HeroSection() {
               </div>
 
               {/* Case 3 - Right: Cherry Blossom (tough case) - slightly smaller */}
-              <div className="absolute top-[12%] right-[2%] z-10 rotate-[10deg] animate-float-slow">
+              <div className="absolute top-[12%] right-[-8%] z-10 rotate-[10deg] animate-float-slow">
                 <Image
                   src="/images/hero/cherry-blossom.png"
                   alt="Cherry Blossom phone case - tough case with pink sakura design"
