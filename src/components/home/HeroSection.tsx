@@ -64,14 +64,14 @@ export function HeroSection() {
 
           {/* Right: Floating phone case images */}
           <div className="hidden lg:block relative">
-            <div className="relative h-[700px]">
+            <div className="relative h-[770px]">
               {/* Case 1 - Left: Rose Garden (clear case) */}
               <div className="absolute top-[10%] left-[0%] z-0 rotate-[-10deg] animate-float-delayed">
                 <Image
                   src="/images/hero/rose-garden.png"
                   alt="Rose Garden floral phone case - clear OtterBox case with vibrant roses"
-                  width={340}
-                  height={680}
+                  width={374}
+                  height={748}
                 />
               </div>
 
@@ -80,8 +80,8 @@ export function HeroSection() {
                 <Image
                   src="/images/hero/midnight-bloom.png"
                   alt="Midnight Bloom dark floral phone case - rugged OtterBox case with purple peonies"
-                  width={350}
-                  height={700}
+                  width={385}
+                  height={770}
                   priority
                 />
               </div>
@@ -91,8 +91,8 @@ export function HeroSection() {
                 <Image
                   src="/images/hero/cherry-blossom.png"
                   alt="Cherry Blossom phone case - tough case with pink sakura design"
-                  width={310}
-                  height={620}
+                  width={341}
+                  height={682}
                 />
               </div>
             </div>
