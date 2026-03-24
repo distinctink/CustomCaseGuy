@@ -107,27 +107,27 @@ async function getOnlineStorePublicationId(): Promise<string | null> {
   return pub?.node.id || null
 }
 
-// Create a product with device variants
+// Create a product, then add device variants separately
+// (Shopify API 2026-01 no longer accepts variants on ProductInput)
 async function createProduct(
   caseType: typeof CASE_TYPES[number],
   devices: typeof PHONE_DEVICES
 ) {
   const title = `Custom ${caseType.name}`
 
-  console.log(`  Creating "${title}" with ${devices.length} variants...`)
+  console.log(`  Creating "${title}"...`)
 
-  const mutation = `
+  // Step 1: Create the product (without variants)
+  const createMutation = `
     mutation productCreate($input: ProductInput!) {
       productCreate(input: $input) {
         product {
           id
           handle
-          variants(first: 100) {
+          variants(first: 1) {
             edges {
               node {
                 id
-                title
-                sku
               }
             }
           }
@@ -137,40 +137,88 @@ async function createProduct(
     }
   `
 
-  const data = await adminFetch<{
+  const createData = await adminFetch<{
     productCreate: {
       product: {
         id: string
         handle: string
-        variants: { edges: { node: { id: string; title: string; sku: string } }[] }
+        variants: { edges: { node: { id: string } }[] }
       }
       userErrors: { field: string[]; message: string }[]
     }
-  }>(mutation, {
+  }>(createMutation, {
     input: {
       title,
       productType: caseType.productType,
       vendor: 'CustomCaseGuy',
       tags: ['customcaseguy', `ccg-${caseType.id}`, 'custom-print', 'print-on-demand'],
       status: 'ACTIVE',
-      variants: devices.map((device) => ({
-        title: device.name,
-        price: caseType.price,
-        sku: `CCG-${caseType.id.toUpperCase()}-${device.id.toUpperCase()}`,
-        inventoryPolicy: 'CONTINUE',
-        requiresShipping: true,
-        taxable: true,
-      })),
-      // Product description (HTML)
       descriptionHtml: `<p>Custom-printed ${caseType.name} designed and printed in the USA by CustomCaseGuy.</p><p>Choose your device model and design at <a href="https://customcaseguy.com">customcaseguy.com</a>.</p>`,
     },
   })
 
-  if (data.productCreate.userErrors.length > 0) {
-    throw new Error(data.productCreate.userErrors.map((e) => e.message).join(', '))
+  if (createData.productCreate.userErrors.length > 0) {
+    throw new Error(createData.productCreate.userErrors.map((e) => e.message).join(', '))
   }
 
-  return data.productCreate.product
+  const product = createData.productCreate.product
+  // The default variant created with the product
+  const defaultVariantId = product.variants.edges[0]?.node.id
+
+  // Step 2: Create device variants using productVariantsBulkCreate
+  console.log(`    Adding ${devices.length} device variants...`)
+
+  const variantsMutation = `
+    mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+      productVariantsBulkCreate(productId: $productId, variants: $variants) {
+        productVariants {
+          id
+          title
+          sku
+        }
+        userErrors { field message }
+      }
+    }
+  `
+
+  const variantsData = await adminFetch<{
+    productVariantsBulkCreate: {
+      productVariants: { id: string; title: string; sku: string }[]
+      userErrors: { field: string[]; message: string }[]
+    }
+  }>(variantsMutation, {
+    productId: product.id,
+    variants: devices.map((device) => ({
+      optionValues: [{ optionName: 'Device', name: device.name }],
+      price: caseType.price,
+      sku: `CCG-${caseType.id.toUpperCase()}-${device.id.toUpperCase()}`,
+      inventoryPolicy: 'CONTINUE',
+      requiresShipping: true,
+      taxable: true,
+    })),
+  })
+
+  if (variantsData.productVariantsBulkCreate.userErrors.length > 0) {
+    throw new Error(variantsData.productVariantsBulkCreate.userErrors.map((e) => e.message).join(', '))
+  }
+
+  // Step 3: Delete the default variant (it has no device associated)
+  if (defaultVariantId) {
+    const deleteMutation = `
+      mutation productVariantDelete($id: ID!) {
+        productVariantDelete(id: $id) {
+          userErrors { field message }
+        }
+      }
+    `
+    await adminFetch(deleteMutation, { id: defaultVariantId })
+  }
+
+  return {
+    id: product.id,
+    handle: product.handle,
+    variants: variantsData.productVariantsBulkCreate.productVariants,
+  }
 }
 
 // Unpublish product from Online Store
@@ -218,10 +266,10 @@ async function main() {
 
     // Build variant map
     variantMap[caseType.id] = {}
-    for (const edge of product.variants.edges) {
-      const device = devices.find((d) => d.name === edge.node.title)
+    for (const variant of product.variants) {
+      const device = devices.find((d) => d.name === variant.title)
       if (device) {
-        variantMap[caseType.id][device.id] = edge.node.id
+        variantMap[caseType.id][device.id] = variant.id
       }
     }
 
