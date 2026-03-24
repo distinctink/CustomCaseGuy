@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useCart } from '@/lib/cart-context'
-import { createCheckout } from '@/lib/shopify'
+import { createCheckout, type CheckoutLineItem } from '@/lib/shopify'
+import { getVariantId, hasVariantMappings } from '@/lib/shopify-variants'
 import { Button } from '@/components/ui/Button'
 
 export function CartDrawer() {
@@ -38,29 +39,39 @@ export function CartDrawer() {
     setError(null)
 
     try {
+      if (!hasVariantMappings()) {
+        setError(
+          'Checkout is not configured yet. Please contact us at info@customcaseguy.com to place your order.'
+        )
+        setCheckingOut(false)
+        return
+      }
+
       // Build line items with custom attributes for each cart item
-      const lineItems = items.map((item) => ({
-        variantId: btoa(`gid://shopify/ProductVariant/${item.caseType}`), // placeholder mapping
-        quantity: item.quantity,
-        customAttributes: [
-          { key: '_design_slug', value: item.designSlug },
-          { key: '_colorway', value: item.colorwayName },
-          { key: '_case_type', value: item.caseType },
-          { key: '_case_name', value: item.caseName },
-          { key: '_device', value: item.deviceId },
-          { key: '_device_name', value: item.deviceName },
-          ...(item.customizationImageUrl
-            ? [{ key: '_customization_image', value: item.customizationImageUrl }]
-            : []),
-        ],
-      }))
+      const lineItems: CheckoutLineItem[] = items.map((item) => {
+        const variantId = getVariantId(item.caseType, item.deviceId)
+        if (!variantId) {
+          throw new Error(`No variant found for ${item.caseName} / ${item.deviceName}. Please contact support.`)
+        }
+        return {
+          variantId,
+          quantity: item.quantity,
+          customAttributes: [
+            { key: '_design_slug', value: item.designSlug },
+            { key: '_colorway', value: item.colorwayName },
+            { key: '_case_type', value: item.caseType },
+            { key: '_case_name', value: item.caseName },
+            { key: '_device', value: item.deviceId },
+            { key: '_device_name', value: item.deviceName },
+            ...(item.customizationImageUrl
+              ? [{ key: '_customization_image', value: item.customizationImageUrl }]
+              : []),
+          ],
+        }
+      })
 
       // Create Shopify checkout with all items
-      const checkout = await createCheckout(
-        lineItems[0].variantId,
-        lineItems[0].quantity,
-        lineItems[0].customAttributes
-      )
+      const checkout = await createCheckout(lineItems)
 
       clearCart()
       setIsOpen(false)
