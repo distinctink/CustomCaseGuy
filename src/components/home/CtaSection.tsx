@@ -1,6 +1,18 @@
+'use client'
+
+import { useMemo } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
+import { SAMPLE_DESIGNS } from '@/lib/sample-data'
+
+function pickRandom<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, count)
+}
 
 export function CtaSection() {
+  const featured = useMemo(() => pickRandom(SAMPLE_DESIGNS, 5), [])
+
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background glow */}
@@ -9,16 +21,24 @@ export function CtaSection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Mini case mockups row */}
+        {/* Mini case mockups row — randomly rotated from design catalog */}
         <div className="flex justify-center gap-4 mb-12">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {featured.map((design, i) => (
             <div
-              key={i}
-              className="w-16 h-32 sm:w-20 sm:h-40 rounded-2xl bg-gradient-to-br from-charcoal to-dark-gray border border-mid-gray/20 shadow-lg"
+              key={design.slug}
+              className="w-16 h-32 sm:w-20 sm:h-40 rounded-2xl border border-mid-gray/20 shadow-lg overflow-hidden relative bg-gradient-to-br from-charcoal to-dark-gray"
               style={{
-                transform: `rotate(${(i - 3) * 8}deg) translateY(${Math.abs(i - 3) * 8}px)`,
+                transform: `rotate(${(i - 2) * 8}deg) translateY(${Math.abs(i - 2) * 8}px)`,
               }}
-            />
+            >
+              <Image
+                src={`/api/placeholder/mockup/${design.slug}`}
+                alt={design.name}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
+            </div>
           ))}
         </div>
 
