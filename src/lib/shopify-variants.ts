@@ -8,12 +8,71 @@
 // specific Shopify variants (Shopify will show a generic checkout).
 
 export const VARIANT_MAP: Record<string, Record<string, string>> = {
-  // Example (will be replaced by setup script output):
-  // symmetry: {
-  //   ip17pm: 'gid://shopify/ProductVariant/12345678',
-  //   ip17p: 'gid://shopify/ProductVariant/12345679',
-  //   ...
-  // },
+  symmetry: {
+    ip17pm: 'gid://shopify/ProductVariant/48883659407612',
+    ip17p: 'gid://shopify/ProductVariant/48883659440380',
+    ip17: 'gid://shopify/ProductVariant/48883659473148',
+    ip17a: 'gid://shopify/ProductVariant/48883659505916',
+    ip16pm: 'gid://shopify/ProductVariant/48883659538684',
+    ip16p: 'gid://shopify/ProductVariant/48883659571452',
+    ip16: 'gid://shopify/ProductVariant/48883659604220',
+    gs25u: 'gid://shopify/ProductVariant/48883659636988',
+    gs25p: 'gid://shopify/ProductVariant/48883659669756',
+    gs25: 'gid://shopify/ProductVariant/48883659702524',
+  },
+  commuter: {
+    ip17pm: 'gid://shopify/ProductVariant/48883659407612',
+    ip17p: 'gid://shopify/ProductVariant/48883659440380',
+    ip17: 'gid://shopify/ProductVariant/48883659473148',
+    ip17a: 'gid://shopify/ProductVariant/48883659505916',
+    ip16pm: 'gid://shopify/ProductVariant/48883659538684',
+    ip16p: 'gid://shopify/ProductVariant/48883659571452',
+    ip16: 'gid://shopify/ProductVariant/48883659604220',
+    gs25u: 'gid://shopify/ProductVariant/48883659636988',
+    gs25p: 'gid://shopify/ProductVariant/48883659669756',
+    gs25: 'gid://shopify/ProductVariant/48883659702524',
+  },
+  defender: {
+    ip17pm: 'gid://shopify/ProductVariant/48883659407612',
+    ip17p: 'gid://shopify/ProductVariant/48883659440380',
+    ip17: 'gid://shopify/ProductVariant/48883659473148',
+    ip17a: 'gid://shopify/ProductVariant/48883659505916',
+    ip16pm: 'gid://shopify/ProductVariant/48883659538684',
+    ip16p: 'gid://shopify/ProductVariant/48883659571452',
+    ip16: 'gid://shopify/ProductVariant/48883659604220',
+    gs25u: 'gid://shopify/ProductVariant/48883659636988',
+    gs25p: 'gid://shopify/ProductVariant/48883659669756',
+    gs25: 'gid://shopify/ProductVariant/48883659702524',
+  },
+  clear: {
+    ip17pm: 'gid://shopify/ProductVariant/48883659407612',
+    ip17p: 'gid://shopify/ProductVariant/48883659440380',
+    ip17: 'gid://shopify/ProductVariant/48883659473148',
+    ip17a: 'gid://shopify/ProductVariant/48883659505916',
+    ip16pm: 'gid://shopify/ProductVariant/48883659538684',
+    ip16p: 'gid://shopify/ProductVariant/48883659571452',
+    ip16: 'gid://shopify/ProductVariant/48883659604220',
+    gs25u: 'gid://shopify/ProductVariant/48883659636988',
+    gs25p: 'gid://shopify/ProductVariant/48883659669756',
+    gs25: 'gid://shopify/ProductVariant/48883659702524',
+  },
+  magsafe: {
+    ip17pm: 'gid://shopify/ProductVariant/48883659407612',
+    ip17p: 'gid://shopify/ProductVariant/48883659440380',
+    ip17: 'gid://shopify/ProductVariant/48883659473148',
+    ip17a: 'gid://shopify/ProductVariant/48883659505916',
+    ip16pm: 'gid://shopify/ProductVariant/48883659538684',
+    ip16p: 'gid://shopify/ProductVariant/48883659571452',
+    ip16: 'gid://shopify/ProductVariant/48883659604220',
+    gs25u: 'gid://shopify/ProductVariant/48883659636988',
+    gs25p: 'gid://shopify/ProductVariant/48883659669756',
+    gs25: 'gid://shopify/ProductVariant/48883659702524',
+  },
+  'ipad-defender': {
+    ipadpro13: 'gid://shopify/ProductVariant/48883659735292',
+    ipadpro11: 'gid://shopify/ProductVariant/48883659768060',
+    ipadair: 'gid://shopify/ProductVariant/48883659800828',
+  },
 }
 
 /**
