@@ -39,7 +39,7 @@ export const CASE_TYPES = [
       '3x military-standard drop tested (MIL-STD-810G)',
       'Slim enough for front or back pockets',
       'Vivid, scratch-resistant custom print',
-      'MagSafe compatible (iPhone 16+)',
+      'MagSafe & wireless charging (iPhone 16+)',
     ],
   },
   {
@@ -56,7 +56,7 @@ export const CASE_TYPES = [
       'Slim enough for pockets and bags',
       'Tested beyond military drop standards',
       'Vivid, scratch-resistant custom print',
-      'MagSafe compatible (iPhone 16+)',
+      'MagSafe & wireless charging (iPhone 16+)',
     ],
   },
   {
@@ -72,7 +72,7 @@ export const CASE_TYPES = [
       'Port covers seal out dust, dirt, and debris',
       '4x military-standard drop tested (MIL-STD-810G)',
       'Vivid, scratch-resistant custom print',
-      'MagSafe compatible (iPhone 16+)',
+      'MagSafe & wireless charging (iPhone 16+)',
       'Holster included on select models',
     ],
   },
@@ -171,12 +171,17 @@ export function includesHolster(deviceId: string): boolean {
   return false
 }
 
-/** Magnetic-compatibility bullet text for a given device */
-function magBullet(caseId: string, deviceId: string): string {
+/**
+ * Magnetic / wireless-charging bullet text for a given device.
+ * Returns null when the device doesn't support MagSafe/MagCase — we make
+ * no wireless-charging claims on pre-MagSafe devices to avoid disputes.
+ */
+function magBullet(caseId: string, deviceId: string): string | null {
   const gal = galaxyGen(deviceId)
   const mag = supportsMagSafe(caseId, deviceId)
 
-  if (!mag) return 'Wireless charging compatible'
+  if (!mag) return null
+
   if (gal !== null && gal >= 26) return 'MagCase compatible (snap-on charging & accessories)'
   return 'MagSafe compatible (snap-on charging & accessories)'
 }
@@ -190,25 +195,31 @@ export function getCaseBullets(caseId: string, deviceId: string): string[] {
   const mag = supportsMagSafe(caseId, deviceId)
   const magLabel = gal !== null && gal >= 26 ? 'MagCase' : 'MagSafe'
 
+  const chargingBullet = magBullet(caseId, deviceId)
+
   switch (caseId) {
-    case 'symmetry':
-      return [
+    case 'symmetry': {
+      const list = [
         'One-piece, easy-on/easy-off design',
         'Raised beveled edges protect screen & camera',
         '3x military-standard drop tested (MIL-STD-810G)',
         'Slim enough for front or back pockets',
         'Vivid, scratch-resistant custom print',
-        magBullet(caseId, deviceId),
       ]
-    case 'commuter':
-      return [
+      if (chargingBullet) list.push(chargingBullet)
+      return list
+    }
+    case 'commuter': {
+      const list = [
         'Dual-layer: soft inner slipcover + hard outer shell',
         'Port covers block dust, lint, and debris',
         'Slim enough for pockets and bags',
         'Tested beyond military drop standards',
         'Vivid, scratch-resistant custom print',
-        magBullet(caseId, deviceId),
       ]
+      if (chargingBullet) list.push(chargingBullet)
+      return list
+    }
     case 'defender': {
       const list = [
         'Multi-layer construction for maximum impact absorption',
@@ -220,32 +231,39 @@ export function getCaseBullets(caseId: string, deviceId: string): string[] {
       list.push(
         '4x military-standard drop tested (MIL-STD-810G)',
         'Vivid, scratch-resistant custom print',
-        magBullet(caseId, deviceId),
       )
+      if (chargingBullet) list.push(chargingBullet)
       return list
     }
-    case 'clear':
-      return [
+    case 'clear': {
+      const list = [
         'Crystal-clear, anti-yellowing polycarbonate shell',
-        mag
-          ? `Built-in ${magLabel} magnet ring for snap-on charging`
-          : 'Wireless charging compatible',
+      ]
+      if (mag) {
+        list.push(`Built-in ${magLabel} magnet ring for snap-on charging`)
+      }
+      list.push(
         'Shockproof TPU bumper edges',
         'Slim, lightweight profile',
         'Vivid, scratch-resistant custom print',
         'Ships within 24-48 hours',
-      ]
-    case 'magsafe':
-      return [
-        mag
-          ? `Built-in ${magLabel} magnets for chargers, wallets & mounts`
-          : 'Wireless charging compatible',
+      )
+      return list
+    }
+    case 'magsafe': {
+      const list: string[] = []
+      if (mag) {
+        list.push(`Built-in ${magLabel} magnets for chargers, wallets & mounts`)
+      }
+      list.push(
         'Dual-layer: impact-absorbing TPU + rigid backplate',
         'Military-grade drop protection (6ft / 1.8m)',
         'Raised edges guard screen & camera lens',
         'Vivid, scratch-resistant custom print',
         'Ships within 24-48 hours',
-      ]
+      )
+      return list
+    }
     default: {
       const ct = CASE_TYPES.find((c) => c.id === caseId)
       return ct ? [...ct.bullets] : []
