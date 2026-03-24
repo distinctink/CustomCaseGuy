@@ -68,36 +68,36 @@ export function HeroSection() {
               {/* Glow behind phones */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-hot-pink/10 blur-[100px]" />
 
-              {/* Case 2 - Left/Back: Midnight Bloom (rugged case) */}
-              <div className="absolute top-[10%] left-[5%] z-0 rotate-[-12deg] animate-float-delayed opacity-95 drop-shadow-xl">
-                <Image
-                  src="/images/hero/midnight-bloom.png"
-                  alt="Midnight Bloom dark floral phone case - rugged OtterBox case with purple peonies"
-                  width={320}
-                  height={640}
-                  className="drop-shadow-[0_20px_50px_rgba(139,92,246,0.3)]"
-                />
-              </div>
-
-              {/* Case 1 - Center/Front: Rose Garden (clear case) */}
-              <div className="absolute top-[8%] left-[22%] z-20 animate-float drop-shadow-2xl">
+              {/* Case 1 - Left: Rose Garden (clear case) */}
+              <div className="absolute top-[10%] left-[0%] z-0 rotate-[-10deg] animate-float-delayed opacity-95 drop-shadow-xl">
                 <Image
                   src="/images/hero/rose-garden.png"
                   alt="Rose Garden floral phone case - clear OtterBox case with vibrant roses"
-                  width={380}
-                  height={760}
-                  className="drop-shadow-[0_25px_60px_rgba(255,46,117,0.3)]"
+                  width={340}
+                  height={680}
+                  className="drop-shadow-[0_20px_50px_rgba(255,46,117,0.25)]"
+                />
+              </div>
+
+              {/* Case 2 - Center/Front: Midnight Bloom (rugged case) */}
+              <div className="absolute top-[8%] left-[22%] z-20 animate-float drop-shadow-2xl">
+                <Image
+                  src="/images/hero/midnight-bloom.png"
+                  alt="Midnight Bloom dark floral phone case - rugged OtterBox case with purple peonies"
+                  width={340}
+                  height={680}
+                  className="drop-shadow-[0_25px_60px_rgba(139,92,246,0.3)]"
                   priority
                 />
               </div>
 
-              {/* Case 3 - Right/Back: Cherry Blossom (tough case) */}
-              <div className="absolute top-[20%] right-[-5%] z-10 rotate-[10deg] animate-float-slow opacity-95 drop-shadow-xl">
+              {/* Case 3 - Right: Cherry Blossom (tough case) - slightly smaller */}
+              <div className="absolute top-[18%] right-[-5%] z-10 rotate-[10deg] animate-float-slow opacity-95 drop-shadow-xl">
                 <Image
                   src="/images/hero/cherry-blossom.png"
                   alt="Cherry Blossom phone case - tough case with pink sakura design"
-                  width={320}
-                  height={640}
+                  width={310}
+                  height={620}
                   className="drop-shadow-[0_20px_50px_rgba(244,114,182,0.25)]"
                 />
               </div>
