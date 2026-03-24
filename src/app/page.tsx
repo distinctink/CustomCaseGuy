@@ -8,6 +8,9 @@ import { SocialProof } from '@/components/home/SocialProof'
 import { WhySection } from '@/components/home/WhySection'
 import { CtaSection } from '@/components/home/CtaSection'
 
+// Re-read trending images folder every 60 seconds
+export const revalidate = 60
+
 export default function HomePage() {
   return (
     <>
