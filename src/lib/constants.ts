@@ -39,7 +39,7 @@ export const CASE_TYPES = [
       '3x military-standard drop tested (MIL-STD-810G)',
       'Slim enough for front or back pockets',
       'Vivid, scratch-resistant custom print',
-      'MagSafe & wireless charging (iPhone 16+)',
+      'MagSafe & wireless charging (iPhone 16 and newer)',
     ],
   },
   {
@@ -56,7 +56,7 @@ export const CASE_TYPES = [
       'Slim enough for pockets and bags',
       'Tested beyond military drop standards',
       'Vivid, scratch-resistant custom print',
-      'MagSafe & wireless charging (iPhone 16+)',
+      'MagSafe & wireless charging (iPhone 16 and newer)',
     ],
   },
   {
@@ -72,7 +72,7 @@ export const CASE_TYPES = [
       'Port covers seal out dust, dirt, and debris',
       '4x military-standard drop tested (MIL-STD-810G)',
       'Vivid, scratch-resistant custom print',
-      'MagSafe & wireless charging (iPhone 16+)',
+      'MagSafe & wireless charging (iPhone 16 and newer)',
       'Holster included on select models',
     ],
   },
@@ -86,7 +86,7 @@ export const CASE_TYPES = [
       'Show off your custom design with edge-to-edge clarity. Built-in MagSafe ring for seamless charging and accessories. Anti-yellowing coating keeps the case crystal clear long after other clear cases go cloudy.',
     bullets: [
       'Crystal-clear, anti-yellowing polycarbonate shell',
-      'Built-in MagSafe magnet ring (iPhone 12+)',
+      'Built-in MagSafe magnet ring (iPhone 12 and newer)',
       'Shockproof TPU bumper edges',
       'Slim, lightweight profile',
       'Vivid, scratch-resistant custom print',
@@ -102,7 +102,7 @@ export const CASE_TYPES = [
     description:
       'Premium dual-layer protection with a built-in MagSafe magnet array. Snap on chargers, wallets, and mounts instantly. Military-grade drop protection in a sleek, pocket-friendly form factor.',
     bullets: [
-      'Built-in MagSafe magnets (iPhone 12+)',
+      'Built-in MagSafe magnets (iPhone 12 and newer)',
       'Dual-layer: impact-absorbing TPU + rigid backplate',
       'Military-grade drop protection (6ft / 1.8m)',
       'Raised edges guard screen & camera lens',
