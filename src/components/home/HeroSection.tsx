@@ -65,40 +65,34 @@ export function HeroSection() {
           {/* Right: Floating phone case images */}
           <div className="hidden lg:block relative">
             <div className="relative h-[700px]">
-              {/* Glow behind phones */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-hot-pink/10 blur-[100px]" />
-
               {/* Case 1 - Left: Rose Garden (clear case) */}
-              <div className="absolute top-[10%] left-[0%] z-0 rotate-[-10deg] animate-float-delayed drop-shadow-xl">
+              <div className="absolute top-[10%] left-[0%] z-0 rotate-[-10deg] animate-float-delayed">
                 <Image
                   src="/images/hero/rose-garden.png"
                   alt="Rose Garden floral phone case - clear OtterBox case with vibrant roses"
                   width={340}
                   height={680}
-                  className="drop-shadow-[0_20px_50px_rgba(255,31,110,0.35)]"
                 />
               </div>
 
               {/* Case 2 - Center/Front: Midnight Bloom (rugged case) */}
-              <div className="absolute top-[8%] left-[22%] z-20 animate-float drop-shadow-2xl">
+              <div className="absolute top-[8%] left-[22%] z-20 animate-float">
                 <Image
                   src="/images/hero/midnight-bloom.png"
                   alt="Midnight Bloom dark floral phone case - rugged OtterBox case with purple peonies"
                   width={350}
                   height={700}
-                  className="drop-shadow-[0_25px_60px_rgba(255,31,110,0.35)]"
                   priority
                 />
               </div>
 
               {/* Case 3 - Right: Cherry Blossom (tough case) - slightly smaller */}
-              <div className="absolute top-[18%] right-[-5%] z-10 rotate-[10deg] animate-float-slow drop-shadow-xl">
+              <div className="absolute top-[12%] right-[2%] z-10 rotate-[10deg] animate-float-slow">
                 <Image
                   src="/images/hero/cherry-blossom.png"
                   alt="Cherry Blossom phone case - tough case with pink sakura design"
                   width={310}
                   height={620}
-                  className="drop-shadow-[0_20px_50px_rgba(255,31,110,0.35)]"
                 />
               </div>
             </div>
