@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 
 export function HeroSection() {
@@ -61,32 +62,45 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right: Floating phone mockups (placeholder) */}
+          {/* Right: Floating phone case images */}
           <div className="hidden lg:block relative">
             <div className="relative h-[600px]">
-              {/* Phone 1 - center */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[480px] rounded-[2.5rem] bg-gradient-to-br from-charcoal to-dark-gray border border-mid-gray/20 shadow-2xl shadow-hot-pink/10 animate-float">
-                <div className="absolute inset-3 rounded-[2rem] bg-gradient-to-br from-hot-pink/20 to-soft-pink/10 flex items-center justify-center">
-                  <span className="text-light-gray text-sm font-body">Rose Garden</span>
-                </div>
-              </div>
-
-              {/* Phone 2 - left */}
-              <div className="absolute top-1/3 left-0 w-[200px] h-[400px] rounded-[2rem] bg-gradient-to-br from-charcoal to-dark-gray border border-mid-gray/20 shadow-xl rotate-[-8deg] animate-float-delayed opacity-80">
-                <div className="absolute inset-3 rounded-[1.5rem] bg-gradient-to-br from-soft-pink/15 to-warm-pink/10 flex items-center justify-center">
-                  <span className="text-light-gray text-xs font-body">Midnight Bloom</span>
-                </div>
-              </div>
-
-              {/* Phone 3 - right */}
-              <div className="absolute top-[45%] right-0 w-[200px] h-[400px] rounded-[2rem] bg-gradient-to-br from-charcoal to-dark-gray border border-mid-gray/20 shadow-xl rotate-[8deg] animate-float-slow opacity-80">
-                <div className="absolute inset-3 rounded-[1.5rem] bg-gradient-to-br from-hot-pink/10 to-charcoal flex items-center justify-center">
-                  <span className="text-light-gray text-xs font-body">Cherry Blossom</span>
-                </div>
-              </div>
-
               {/* Glow behind phones */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-hot-pink/10 blur-[80px]" />
+
+              {/* Case 1 - Center: Rose Garden (clear case) */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 animate-float drop-shadow-2xl">
+                <Image
+                  src="/images/hero/rose-garden.png"
+                  alt="Rose Garden floral phone case - clear OtterBox case with vibrant roses"
+                  width={240}
+                  height={480}
+                  className="drop-shadow-[0_20px_40px_rgba(255,46,117,0.25)]"
+                  priority
+                />
+              </div>
+
+              {/* Case 2 - Left: Midnight Bloom (rugged case) */}
+              <div className="absolute top-1/4 left-0 z-0 rotate-[-8deg] animate-float-delayed opacity-90 drop-shadow-xl">
+                <Image
+                  src="/images/hero/midnight-bloom.png"
+                  alt="Midnight Bloom dark floral phone case - rugged OtterBox case with purple peonies"
+                  width={200}
+                  height={400}
+                  className="drop-shadow-[0_15px_30px_rgba(139,92,246,0.2)]"
+                />
+              </div>
+
+              {/* Case 3 - Right: Cherry Blossom (tough case) */}
+              <div className="absolute top-[40%] right-0 z-0 rotate-[8deg] animate-float-slow opacity-90 drop-shadow-xl">
+                <Image
+                  src="/images/hero/cherry-blossom.png"
+                  alt="Cherry Blossom phone case - tough case with pink sakura design"
+                  width={200}
+                  height={400}
+                  className="drop-shadow-[0_15px_30px_rgba(244,114,182,0.2)]"
+                />
+              </div>
             </div>
           </div>
         </div>
