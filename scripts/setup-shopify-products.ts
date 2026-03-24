@@ -16,7 +16,8 @@
  *     write_products, read_products, write_publications, read_publications
  */
 
-import 'dotenv/config'
+import { config } from 'dotenv'
+config({ path: '.env.local' })
 
 const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN
 const MYSHOPIFY_DOMAIN = process.env.SHOPIFY_MYSHOPIFY_DOMAIN || 'distinct-ink.myshopify.com'
