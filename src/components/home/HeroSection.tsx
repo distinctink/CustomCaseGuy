@@ -76,7 +76,7 @@ export function HeroSection() {
               </div>
 
               {/* Case 2 - Center/Front: Midnight Bloom (rugged case) */}
-              <div className="absolute top-[8%] left-[22%] z-20 animate-float">
+              <div className="absolute top-[8%] left-[22%] z-20 animate-float drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
                 <Image
                   src="/images/hero/midnight-bloom.png"
                   alt="Midnight Bloom dark floral phone case - rugged OtterBox case with purple peonies"
