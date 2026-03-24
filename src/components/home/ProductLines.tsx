@@ -70,12 +70,7 @@ export function ProductLines() {
             </p>
 
             <div className="space-y-3">
-              {[
-                'Advanced printing with vivid, scratch-resistant color',
-                'Precise cutouts for all ports and buttons',
-                'Wireless charging compatible',
-                'Ships within 24-48 hours',
-              ].map((feature) => (
+              {active.bullets.map((feature) => (
                 <div key={feature} className="flex items-center gap-3">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
