@@ -6,11 +6,37 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '', consent: false })
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert('Message sent! We\'ll get back to you within 24 hours.')
-    setFormData({ name: '', email: '', message: '', consent: false })
+    setStatus('sending')
+    setErrorMsg('')
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send message.')
+      }
+
+      setStatus('sent')
+      setFormData({ name: '', email: '', message: '', consent: false })
+    } catch (err) {
+      setStatus('error')
+      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    }
   }
 
   return (
@@ -82,8 +108,22 @@ export default function ContactPage() {
               </label>
             </div>
 
-            <Button type="submit" fullWidth size="lg">
-              Send Message
+            {status === 'sent' && (
+              <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-center">
+                <p className="text-green-400 font-display font-600 text-sm">
+                  Message sent! We&apos;ll get back to you within 24 hours.
+                </p>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
+                <p className="text-red-400 font-body text-sm">{errorMsg}</p>
+              </div>
+            )}
+
+            <Button type="submit" fullWidth size="lg" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending...' : 'Send Message'}
             </Button>
           </form>
         </div>

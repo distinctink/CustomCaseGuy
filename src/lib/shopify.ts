@@ -28,9 +28,16 @@ async function shopifyFetch<T>(query: string, variables?: Record<string, unknown
   return json.data
 }
 
-// Create a checkout and add items
+// Line item for checkout
+export interface CheckoutLineItem {
+  variantId: string
+  quantity: number
+  customAttributes?: { key: string; value: string }[]
+}
+
+// Create a checkout and add items (supports single or multiple line items)
 export async function createCheckout(
-  variantId: string,
+  variantIdOrItems: string | CheckoutLineItem[],
   quantity: number = 1,
   customAttributes: { key: string; value: string }[] = []
 ) {
@@ -50,15 +57,13 @@ export async function createCheckout(
     }
   `
 
+  const lineItems = Array.isArray(variantIdOrItems)
+    ? variantIdOrItems
+    : [{ variantId: variantIdOrItems, quantity, customAttributes }]
+
   const variables = {
     input: {
-      lineItems: [
-        {
-          variantId,
-          quantity,
-          customAttributes,
-        },
-      ],
+      lineItems,
     },
   }
 

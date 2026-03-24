@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { DEVICES, CASE_TYPES, getMockupUrl, getCaseBullets, supportsMagSafe } from '@/lib/constants'
 import { SAMPLE_DESIGNS } from '@/lib/sample-data'
 import { Button } from '@/components/ui/Button'
+import { useCart } from '@/lib/cart-context'
 import { notFound, useSearchParams } from 'next/navigation'
 
 const ANGLES = ['front', 'angle', 'lifestyle'] as const
@@ -46,9 +47,19 @@ export default function ProductPage({
   // Build mockup URL (using predictable pattern)
   const mockupUrl = getMockupUrl(designSlug, selectedCase, selectedDevice, selectedAngle)
 
+  const { addItem } = useCart()
+
   const handleAddToCart = () => {
-    // Will integrate with Shopify Storefront API
-    alert(`Added to cart:\n${design.name} (${design.colorwayName})\n${caseType.name} for ${device.name}\n$${caseType.price.toFixed(2)}`)
+    addItem({
+      designSlug: design.slug,
+      designName: design.name,
+      colorwayName: design.colorwayName,
+      caseType: selectedCase,
+      caseName: caseType.name,
+      deviceId: selectedDevice,
+      deviceName: device.name,
+      price: caseType.price,
+    })
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { CASE_TYPES, DEVICES } from '@/lib/constants'
 import { Button } from '@/components/ui/Button'
+import { useCart } from '@/lib/cart-context'
 
 type EditorTab = 'ai' | 'text' | 'upload' | 'shapes' | 'background'
 
@@ -298,8 +299,21 @@ export default function DesignEditorPage() {
     }
   }
 
+  const { addItem } = useCart()
+
   const handleAddToCart = () => {
-    alert(`Custom design added to cart!\n${caseType.name} for ${DEVICES.find((d) => d.id === selectedDevice)?.name}\n$${caseType.price.toFixed(2)}`)
+    const device = DEVICES.find((d) => d.id === selectedDevice)
+    addItem({
+      designSlug: 'custom-design',
+      designName: 'Custom Design',
+      colorwayName: 'Custom',
+      caseType: selectedCase,
+      caseName: caseType.name,
+      deviceId: selectedDevice,
+      deviceName: device?.name || selectedDevice,
+      price: caseType.price,
+      customizationData: JSON.stringify({ aiImage, textInput, fontSize, textColor }),
+    })
   }
 
   // Filter fonts by search

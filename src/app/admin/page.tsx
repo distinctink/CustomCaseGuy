@@ -22,8 +22,9 @@ export default function AdminPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              // Simple password check — replace with proper auth
-              if (password === 'admin' || password) {
+              // Check against ADMIN_PASSWORD env var (set in .env.local)
+              const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin'
+              if (password === adminPass) {
                 setIsAuthenticated(true)
               }
             }}

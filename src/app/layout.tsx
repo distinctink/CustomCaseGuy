@@ -3,6 +3,8 @@ import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/ui/CookieConsent'
+import { CartProvider } from '@/lib/cart-context'
+import { CartDrawer } from '@/components/ui/CartDrawer'
 
 export const metadata: Metadata = {
   title: {
@@ -33,10 +35,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
-        <Navbar />
-        <main id="main-content" className="flex-1">{children}</main>
-        <Footer />
-        <CookieConsent />
+        <CartProvider>
+          <Navbar />
+          <main id="main-content" className="flex-1">{children}</main>
+          <Footer />
+          <CartDrawer />
+          <CookieConsent />
+        </CartProvider>
       </body>
     </html>
   )

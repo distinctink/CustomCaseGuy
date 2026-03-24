@@ -10,7 +10,7 @@ type ButtonProps = {
 } & React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const baseStyles =
-  'inline-flex items-center justify-center font-display font-600 rounded-xl transition-all duration-200 cursor-pointer'
+  'inline-flex items-center justify-center font-display font-600 rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100'
 
 const variants = {
   primary:
