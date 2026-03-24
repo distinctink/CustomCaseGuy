@@ -26,8 +26,8 @@ export default function AboutPage() {
               our own site.
             </p>
             <p className="text-light-gray font-body leading-relaxed">
-              We&apos;re not a faceless dropshipper. Every single case is UV printed &amp; sublimated in-house at our US studios
-              using commercial-grade printers. We print on genuine OtterBox cases
+              We&apos;re not a faceless dropshipper. Every single case is printed in-house at our US studios
+              using the most advanced printing technology available. We print on genuine OtterBox cases
               (Symmetry, Commuter, Defender) and premium clear and MagSafe cases. When you order from us,
               your case is made by real people who care about quality.
             </p>
@@ -61,8 +61,8 @@ export default function AboutPage() {
               </p>
               <p>
                 <span className="text-hot-pink font-display font-700">2. We print.</span> Your design is
-                UV printed &amp; sublimated directly onto a genuine case using commercial-grade printers with vibrant,
-                scratch-resistant ink.
+                Printed directly onto a genuine case using our advanced process — colors come out incredibly vivid,
+                scratch-resistant, and built to last.
               </p>
               <p>
                 <span className="text-hot-pink font-display font-700">3. We ship.</span> Most orders ship

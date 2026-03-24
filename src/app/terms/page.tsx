@@ -57,8 +57,8 @@ export default function TermsOfServicePage() {
               </p>
               <p>
                 Product images on our website are for illustration purposes. Colors may vary slightly due
-                to differences in screen displays and printing processes. We use commercial-grade UV
-                printers and sublimation to ensure the highest quality output.
+                to differences in screen displays and printing processes. We use the most advanced
+                printing technology available to ensure the highest quality output.
               </p>
             </div>
           </div>

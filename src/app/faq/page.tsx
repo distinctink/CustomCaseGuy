@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: 'How is the design printed?',
-    a: 'We use commercial-grade UV printers that print directly onto the case surface. The ink is vibrant, scratch-resistant, and long-lasting. It won\'t peel, crack, or fade like vinyl wraps or stickers.',
+    a: 'We use the most advanced printing technology available — printing directly onto the case surface. The colors are stunningly vivid, scratch-resistant, and built to last. It won\'t peel, crack, or fade like vinyl wraps or stickers.',
   },
   {
     q: 'Can I design my own case?',
@@ -29,7 +29,7 @@ const FAQS = [
   },
   {
     q: 'Are these real OtterBox cases?',
-    a: 'Yes! We purchase genuine OtterBox cases and UV print your design directly onto them. You get the same OtterBox protection you trust, with a custom design.',
+    a: 'Yes! We purchase genuine OtterBox cases and print your design directly onto them. You get the same OtterBox protection you trust, with a custom design.',
   },
   {
     q: 'Do the cases support wireless charging?',

@@ -71,7 +71,7 @@ export function ProductLines() {
 
             <div className="space-y-3">
               {[
-                'UV printed & sublimated with vibrant, scratch-resistant ink',
+                'Advanced printing with vivid, scratch-resistant color',
                 'Precise cutouts for all ports and buttons',
                 'Wireless charging compatible',
                 'Ships within 24-48 hours',

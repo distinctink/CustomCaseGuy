@@ -3,7 +3,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 const FEATURES = [
   {
     title: 'Printed In-House',
-    description: 'Every case is UV printed & sublimated at our US studios with vibrant, scratch-resistant ink that lasts.',
+    description: 'Every case is crafted in our US studios using advanced printing that delivers stunningly vivid, scratch-resistant color that lasts.',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
   },
   {
@@ -12,8 +12,8 @@ const FEATURES = [
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>,
   },
   {
-    title: 'Design It Yourself',
-    description: 'Add your name, upload a photo, pick your colors. See exactly how it looks on your case before you buy.',
+    title: 'AI-Powered Design Studio',
+    description: 'Describe your dream case and watch AI create it instantly. Or upload your own art, add text, pick colors — the possibilities are endless.',
     icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>,
   },
   {

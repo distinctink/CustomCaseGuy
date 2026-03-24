@@ -33,7 +33,7 @@ export function HeroSection() {
 
             <p className="mt-6 text-light-gray text-lg sm:text-xl font-body font-300 max-w-lg leading-relaxed">
               Custom-printed on genuine OtterBox and premium cases.
-              Choose from 400+ designs or create something completely your own.
+              Choose from 400+ designs or let AI create something completely unique — just describe it.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
@@ -41,7 +41,7 @@ export function HeroSection() {
                 Browse Designs
               </Button>
               <Button href="/design-editor" variant="outline" size="lg">
-                Design Your Own
+                Create with AI
               </Button>
             </div>
 
