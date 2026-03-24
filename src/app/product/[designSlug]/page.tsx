@@ -2,7 +2,7 @@
 
 import { use, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { DEVICES, CASE_TYPES, getMockupUrl } from '@/lib/constants'
+import { DEVICES, CASE_TYPES, getMockupUrl, getCaseBullets, supportsMagSafe } from '@/lib/constants'
 import { SAMPLE_DESIGNS } from '@/lib/sample-data'
 import { Button } from '@/components/ui/Button'
 import { notFound, useSearchParams } from 'next/navigation'
@@ -224,14 +224,36 @@ export default function ProductPage({
               Personalize This Design
             </Button>
 
-            {/* Trust features */}
+            {/* Case-specific features (device-aware) */}
+            <div className="space-y-3 mb-8">
+              {getCaseBullets(selectedCase, selectedDevice).map((feature) => (
+                <div key={feature} className="flex items-center gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-hot-pink flex-shrink-0"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  <span className="text-light-gray text-sm font-body">{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust badges */}
             <div className="space-y-3">
               {[
                 { icon: '☀️', text: 'Printed in-house in the USA' },
                 { icon: '📦', text: 'Free shipping on all U.S. orders' },
                 { icon: '🛡️', text: `Genuine ${caseType.name.includes('OtterBox') ? 'OtterBox' : 'premium'} case` },
                 { icon: '⚡', text: 'Ships within 24-48 hours' },
-                { icon: '📱', text: 'Wireless charging compatible' },
               ].map((item) => (
                 <div key={item.text} className="flex items-center gap-3">
                   <span className="text-base">{item.icon}</span>

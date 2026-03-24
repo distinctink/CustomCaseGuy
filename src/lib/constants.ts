@@ -22,6 +22,8 @@ export const COLORS = {
 } as const
 
 // Case types with metadata
+// NOTE: `bullets` here are generic (no device context) — used on the homepage.
+// For device-specific bullets use getCaseBullets() below.
 export const CASE_TYPES = [
   {
     id: 'symmetry',
@@ -37,7 +39,7 @@ export const CASE_TYPES = [
       '3x military-standard drop tested (MIL-STD-810G)',
       'Slim enough for front or back pockets',
       'Vivid, scratch-resistant custom print',
-      'Wireless & MagSafe charging compatible',
+      'MagSafe compatible (iPhone 16+)',
     ],
   },
   {
@@ -54,7 +56,7 @@ export const CASE_TYPES = [
       'Slim enough for pockets and bags',
       'Tested beyond military drop standards',
       'Vivid, scratch-resistant custom print',
-      'Wireless & MagSafe charging compatible',
+      'MagSafe compatible (iPhone 16+)',
     ],
   },
   {
@@ -64,14 +66,14 @@ export const CASE_TYPES = [
     tag: 'MAX PROTECTION',
     tagline: 'Our toughest case. Period.',
     description:
-      'Multi-layer defense engineered for the harshest conditions. Tested to 4x military standard with port covers that seal out dust and grit. Includes a holster that doubles as a kickstand. The most rugged case we offer.',
+      'Multi-layer defense engineered for the harshest conditions. Tested to 4x military standard with port covers that seal out dust and grit. The most rugged case we offer.',
     bullets: [
       'Multi-layer construction for maximum impact absorption',
       'Port covers seal out dust, dirt, and debris',
-      'Includes holster/belt clip that doubles as a kickstand',
       '4x military-standard drop tested (MIL-STD-810G)',
       'Vivid, scratch-resistant custom print',
-      'Wireless charging compatible',
+      'MagSafe compatible (iPhone 16+)',
+      'Holster included on select models',
     ],
   },
   {
@@ -84,7 +86,7 @@ export const CASE_TYPES = [
       'Show off your custom design with edge-to-edge clarity. Built-in MagSafe ring for seamless charging and accessories. Anti-yellowing coating keeps the case crystal clear long after other clear cases go cloudy.',
     bullets: [
       'Crystal-clear, anti-yellowing polycarbonate shell',
-      'Built-in MagSafe magnet ring for snap-on charging',
+      'Built-in MagSafe magnet ring (iPhone 12+)',
       'Shockproof TPU bumper edges',
       'Slim, lightweight profile',
       'Vivid, scratch-resistant custom print',
@@ -100,7 +102,7 @@ export const CASE_TYPES = [
     description:
       'Premium dual-layer protection with a built-in MagSafe magnet array. Snap on chargers, wallets, and mounts instantly. Military-grade drop protection in a sleek, pocket-friendly form factor.',
     bullets: [
-      'Built-in MagSafe magnets for chargers, wallets & mounts',
+      'Built-in MagSafe magnets (iPhone 12+)',
       'Dual-layer: impact-absorbing TPU + rigid backplate',
       'Military-grade drop protection (6ft / 1.8m)',
       'Raised edges guard screen & camera lens',
@@ -126,6 +128,130 @@ export const CASE_TYPES = [
     ],
   },
 ] as const
+
+// ---------------------------------------------------------------------------
+// Device-awareness helpers
+// ---------------------------------------------------------------------------
+
+/** Extract iPhone generation number from a device ID (e.g. 'ip17pm' → 17) */
+function iPhoneGen(deviceId: string): number | null {
+  const m = deviceId.match(/^ip(\d+)/)
+  return m ? parseInt(m[1], 10) : null
+}
+
+/** Extract Galaxy S generation number from a device ID (e.g. 'gs25u' → 25) */
+function galaxyGen(deviceId: string): number | null {
+  const m = deviceId.match(/^gs(\d+)/)
+  return m ? parseInt(m[1], 10) : null
+}
+
+/** Does this device + case combo support MagSafe / MagCase? */
+export function supportsMagSafe(caseId: string, deviceId: string): boolean {
+  const iph = iPhoneGen(deviceId)
+  const gal = galaxyGen(deviceId)
+
+  // Clear & MagSafe Tough: magnetic from iPhone 12+, Galaxy S26+
+  if (caseId === 'clear' || caseId === 'magsafe') {
+    if (iph !== null) return iph >= 12
+    if (gal !== null) return gal >= 26
+    return false
+  }
+
+  // OtterBox cases: MagSafe from iPhone 16+, Galaxy S26+ (MagCase)
+  if (iph !== null) return iph >= 16
+  if (gal !== null) return gal >= 26
+  return false
+}
+
+/** Does the Defender for this device include a holster? (Pre-iPhone 16 only) */
+export function includesHolster(deviceId: string): boolean {
+  const iph = iPhoneGen(deviceId)
+  if (iph !== null) return iph < 16
+  // Galaxy and iPad Defenders never shipped with holster
+  return false
+}
+
+/** Magnetic-compatibility bullet text for a given device */
+function magBullet(caseId: string, deviceId: string): string {
+  const gal = galaxyGen(deviceId)
+  const mag = supportsMagSafe(caseId, deviceId)
+
+  if (!mag) return 'Wireless charging compatible'
+  if (gal !== null && gal >= 26) return 'MagCase compatible (snap-on charging & accessories)'
+  return 'MagSafe compatible (snap-on charging & accessories)'
+}
+
+/**
+ * Return device-specific feature bullets for a case + device combination.
+ * Use this on the product detail page where the device is known.
+ */
+export function getCaseBullets(caseId: string, deviceId: string): string[] {
+  const gal = galaxyGen(deviceId)
+  const mag = supportsMagSafe(caseId, deviceId)
+  const magLabel = gal !== null && gal >= 26 ? 'MagCase' : 'MagSafe'
+
+  switch (caseId) {
+    case 'symmetry':
+      return [
+        'One-piece, easy-on/easy-off design',
+        'Raised beveled edges protect screen & camera',
+        '3x military-standard drop tested (MIL-STD-810G)',
+        'Slim enough for front or back pockets',
+        'Vivid, scratch-resistant custom print',
+        magBullet(caseId, deviceId),
+      ]
+    case 'commuter':
+      return [
+        'Dual-layer: soft inner slipcover + hard outer shell',
+        'Port covers block dust, lint, and debris',
+        'Slim enough for pockets and bags',
+        'Tested beyond military drop standards',
+        'Vivid, scratch-resistant custom print',
+        magBullet(caseId, deviceId),
+      ]
+    case 'defender': {
+      const list = [
+        'Multi-layer construction for maximum impact absorption',
+        'Port covers seal out dust, dirt, and debris',
+      ]
+      if (includesHolster(deviceId)) {
+        list.push('Includes holster/belt clip that doubles as a kickstand')
+      }
+      list.push(
+        '4x military-standard drop tested (MIL-STD-810G)',
+        'Vivid, scratch-resistant custom print',
+        magBullet(caseId, deviceId),
+      )
+      return list
+    }
+    case 'clear':
+      return [
+        'Crystal-clear, anti-yellowing polycarbonate shell',
+        mag
+          ? `Built-in ${magLabel} magnet ring for snap-on charging`
+          : 'Wireless charging compatible',
+        'Shockproof TPU bumper edges',
+        'Slim, lightweight profile',
+        'Vivid, scratch-resistant custom print',
+        'Ships within 24-48 hours',
+      ]
+    case 'magsafe':
+      return [
+        mag
+          ? `Built-in ${magLabel} magnets for chargers, wallets & mounts`
+          : 'Wireless charging compatible',
+        'Dual-layer: impact-absorbing TPU + rigid backplate',
+        'Military-grade drop protection (6ft / 1.8m)',
+        'Raised edges guard screen & camera lens',
+        'Vivid, scratch-resistant custom print',
+        'Ships within 24-48 hours',
+      ]
+    default: {
+      const ct = CASE_TYPES.find((c) => c.id === caseId)
+      return ct ? [...ct.bullets] : []
+    }
+  }
+}
 
 export type CaseTypeId = (typeof CASE_TYPES)[number]['id']
 
