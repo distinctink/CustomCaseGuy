@@ -35,20 +35,20 @@ export interface CheckoutLineItem {
   customAttributes?: { key: string; value: string }[]
 }
 
-// Create a checkout and add items (supports single or multiple line items)
+// Create a cart and return the checkout URL (Cart API replaces deprecated Checkout API)
 export async function createCheckout(
   variantIdOrItems: string | CheckoutLineItem[],
   quantity: number = 1,
   customAttributes: { key: string; value: string }[] = []
 ) {
   const mutation = `
-    mutation checkoutCreate($input: CheckoutCreateInput!) {
-      checkoutCreate(input: $input) {
-        checkout {
+    mutation cartCreate($input: CartInput!) {
+      cartCreate(input: $input) {
+        cart {
           id
-          webUrl
+          checkoutUrl
         }
-        checkoutUserErrors {
+        userErrors {
           code
           field
           message
@@ -61,24 +61,35 @@ export async function createCheckout(
     ? variantIdOrItems
     : [{ variantId: variantIdOrItems, quantity, customAttributes }]
 
+  // Cart API uses merchandiseId instead of variantId, and attributes instead of customAttributes
+  const lines = lineItems.map((item) => ({
+    merchandiseId: item.variantId,
+    quantity: item.quantity,
+    attributes: item.customAttributes?.map((attr) => ({
+      key: attr.key,
+      value: attr.value,
+    })) || [],
+  }))
+
   const variables = {
     input: {
-      lineItems,
+      lines,
     },
   }
 
   const data = await shopifyFetch<{
-    checkoutCreate: {
-      checkout: { id: string; webUrl: string }
-      checkoutUserErrors: { message: string }[]
+    cartCreate: {
+      cart: { id: string; checkoutUrl: string }
+      userErrors: { message: string }[]
     }
   }>(mutation, variables)
 
-  if (data.checkoutCreate.checkoutUserErrors.length > 0) {
-    throw new Error(data.checkoutCreate.checkoutUserErrors[0].message)
+  if (data.cartCreate.userErrors.length > 0) {
+    throw new Error(data.cartCreate.userErrors[0].message)
   }
 
-  return data.checkoutCreate.checkout
+  // Return in same shape as old checkout for compatibility
+  return { id: data.cartCreate.cart.id, webUrl: data.cartCreate.cart.checkoutUrl }
 }
 
 // Fetch products tagged with 'customcaseguy'
