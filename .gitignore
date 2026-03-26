@@ -30,6 +30,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# claudesync local config
+sync/sync-config.local.sh
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
