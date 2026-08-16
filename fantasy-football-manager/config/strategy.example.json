@@ -1,0 +1,84 @@
+{
+  "_comment": "Copy to config/strategy.json and edit. Anything you omit falls back to the defaults in src/config.ts. Every number the decision engine uses lives here.",
+
+  "neverDrop": [],
+  "dropFirst": [],
+
+  "_positionFloors": "Minimum players to keep at each position after any transaction. The engine also refuses any drop that would make your starting lineup unfillable, so these are an extra cushion on top of that.",
+  "positionFloors": { "QB": 1, "RB": 4, "WR": 4, "TE": 1, "K": 1, "DEF": 1 },
+
+  "_positionPriority": "Scarcity weights used only when comparing pickups across positions. A 10 pts/gm RB outranks a 10 pts/gm kicker.",
+  "positionPriority": { "RB": 1.15, "WR": 1.05, "TE": 1.0, "QB": 0.85, "K": 0.4, "DEF": 0.5 },
+
+  "valuation": {
+    "_comment": "seasonWeight + recentWeight are normalised, so they need not sum to exactly 1.",
+    "seasonWeight": 0.4,
+    "recentWeight": 0.6,
+    "recentWindowGames": 4,
+    "ownershipWeight": 0.15,
+    "byeWeekDiscount": 0.0,
+
+    "_roleChangeBonus": "Points per game added when news implies this role change. These are the single biggest lever on how aggressively the bot chases handcuffs and backups.",
+    "roleChangeBonus": {
+      "starter_out_backup_promoted": 6.0,
+      "committee_to_bellcow": 4.5,
+      "wr2_to_wr1": 3.0,
+      "te_starter_out": 2.5,
+      "qb_starter_change": 5.0,
+      "returning_from_injury": 2.0
+    },
+
+    "_injuryMultiplier": "Applied to projected output. O/IR/PUP at 0 means an injured player is worth nothing until he is back.",
+    "injuryMultiplier": {
+      "HEALTHY": 1.0,
+      "PROBABLE": 0.95,
+      "Q": 0.8,
+      "QUESTIONABLE": 0.8,
+      "D": 0.45,
+      "DOUBTFUL": 0.45,
+      "O": 0.0,
+      "OUT": 0.0,
+      "IR": 0.0,
+      "PUP": 0.0,
+      "NA": 0.0,
+      "SUSP": 0.0
+    }
+  },
+
+  "waiver": {
+    "_comment": "This league is WAIVER PRIORITY, not FAAB. These numbers decide when burning priority beats waiting for a player to clear to free agency.",
+
+    "_minValueAdded": "Points per game a pickup must gain over the player you would drop before the engine will act at all. Raise it to move less.",
+    "minValueAdded": 1.5,
+
+    "_priorityOneValue": "What holding waiver priority #1 is worth, in the same points-per-game units, at the start of the season. This is the price of burning it. Raise it to hoard priority for a genuine league-winner; lower it to spend more freely.",
+    "priorityOneValue": 3.0,
+
+    "_priorityDecay": "How fast priority loses value down the queue. 0.82 means #2 is worth 82% of #1, #3 is 67%, and so on.",
+    "priorityDecay": 0.82,
+
+    "regularSeasonWeeks": 14,
+
+    "_contestThreshold": "If the estimated chance a rival claims the player is below this, skip the claim and take him as a free agent after waivers clear.",
+    "contestThreshold": 0.35,
+
+    "_activeRivals": "Fallback count of rivals treated as threats before there is enough transaction history to detect them. Your league has ~12 teams but only a couple who actually move, so this is deliberately low.",
+    "activeRivals": 3,
+    "activeRivalLookbackDays": 14,
+
+    "_rivalPassivity": "How reluctant rivals are assumed to be about spending their own priority. Higher = more passive = you claim less and let more clear. Raise it if the bot burns priority on players nobody wanted; lower it if you keep getting sniped.",
+    "rivalPassivity": 1.4
+  },
+
+  "execution": {
+    "_comment": "Guard rails on autonomy.",
+    "maxTransactionsPerDay": 4,
+    "minHoldHours": 48,
+    "maxNewsAgeMinutes": 180,
+    "pollIntervalSeconds": 90,
+    "faRefreshSeconds": 600,
+
+    "_autoExecuteTrades": "Locked to false. Setting this true is rejected at load time — trades always require your approval.",
+    "autoExecuteTrades": false
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "yahoo-ff-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Autonomous Yahoo Fantasy Football manager: Yahoo MCP server + ESPN news poller + waiver-priority decision engine",
+  "engines": {
+    "node": ">=20.10"
+  },
+  "bin": {
+    "ffm": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx test/*.test.ts",
+    "auth": "tsx src/cli/index.ts auth",
+    "doctor": "tsx src/cli/index.ts doctor",
+    "league": "tsx src/cli/index.ts league",
+    "roster": "tsx src/cli/index.ts roster",
+    "fa": "tsx src/cli/index.ts free-agents",
+    "plan": "tsx src/cli/index.ts plan",
+    "watch": "tsx src/cli/index.ts watch",
+    "approvals": "tsx src/cli/index.ts approvals",
+    "mcp": "tsx src/mcp/server.ts",
+    "mcp:built": "node dist/mcp/server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "dotenv": "^17.3.1",
+    "fast-xml-parser": "^4.5.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}

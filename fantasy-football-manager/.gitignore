@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Secrets and live state — never commit these.
+.env
+data/
+config/strategy.json
