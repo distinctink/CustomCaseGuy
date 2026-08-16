@@ -39,6 +39,38 @@ export interface WatcherState {
   lastFaRefresh: number;
   /** Pending waiver claims we filed: transactionKey -> summary. */
   pendingClaims: Record<string, { playerKey: string; playerName: string; filedAt: number; reason: string }>;
+  /**
+   * Players we deliberately let clear rather than claiming. Once waivers
+   * process, these become first-come free agents, so the watcher polls hard
+   * around `clearsAt` to grab them ahead of the other managers.
+   */
+  watchlist: Record<string, WatchlistEntry>;
+  /** Outcomes of claims we filed, for tuning and for the activity log. */
+  claimOutcomes: ClaimOutcome[];
+}
+
+export interface WatchlistEntry {
+  playerKey: string;
+  playerName: string;
+  position: string;
+  /** Unix ms when the player is expected to clear waivers. */
+  clearsAt: number;
+  /** Points per game we expected to gain. */
+  valueAdded: number;
+  reason: string;
+  addedAt: number;
+  /** Attempts made since the clear time, to bound retries. */
+  attempts: number;
+}
+
+export interface ClaimOutcome {
+  at: number;
+  transactionKey: string;
+  playerKey: string;
+  playerName: string;
+  result: 'won' | 'lost' | 'expired';
+  /** Our waiver priority when the claim was filed. */
+  filedAtPriority?: number;
 }
 
 const EMPTY: WatcherState = {
@@ -48,6 +80,8 @@ const EMPTY: WatcherState = {
   seenTransactions: {},
   lastFaRefresh: 0,
   pendingClaims: {},
+  watchlist: {},
+  claimOutcomes: [],
 };
 
 /** Forget event hashes older than this so the file does not grow forever. */
@@ -151,6 +185,65 @@ export function recordPendingClaim(
 export function clearPendingClaim(transactionKey: string, state = loadState()): void {
   delete state.pendingClaims[transactionKey];
   saveState(state);
+}
+
+/** Record how a filed claim actually resolved, and retire it. */
+export function recordClaimOutcome(outcome: ClaimOutcome, state = loadState()): void {
+  state.claimOutcomes.push(outcome);
+  if (state.claimOutcomes.length > 100) state.claimOutcomes = state.claimOutcomes.slice(-100);
+  delete state.pendingClaims[outcome.transactionKey];
+  saveState(state);
+}
+
+// ---------------------------------------------------------------------------
+// Free-agent watchlist
+// ---------------------------------------------------------------------------
+
+/**
+ * Track a player we chose not to claim. Priority-league strategy only pays off
+ * if we actually show up when he clears — otherwise "wait for free agency" is
+ * just a decision to lose him to whoever is watching more closely.
+ */
+export function addToWatchlist(entry: Omit<WatchlistEntry, 'addedAt' | 'attempts'>, state = loadState()): void {
+  const existing = state.watchlist[entry.playerKey];
+  state.watchlist[entry.playerKey] = {
+    ...entry,
+    addedAt: existing?.addedAt ?? Date.now(),
+    attempts: existing?.attempts ?? 0,
+  };
+  saveState(state);
+}
+
+export function removeFromWatchlist(playerKey: string, state = loadState()): void {
+  delete state.watchlist[playerKey];
+  saveState(state);
+}
+
+/** Watchlist entries whose clear time has arrived and that still have retries left. */
+export function dueWatchlistEntries(maxAttempts: number, state = loadState()): WatchlistEntry[] {
+  const now = Date.now();
+  return Object.values(state.watchlist)
+    .filter((e) => e.clearsAt <= now && e.attempts < maxAttempts)
+    .sort((a, b) => b.valueAdded - a.valueAdded);
+}
+
+export function recordWatchlistAttempt(playerKey: string, state = loadState()): void {
+  const entry = state.watchlist[playerKey];
+  if (!entry) return;
+  entry.attempts += 1;
+  saveState(state);
+}
+
+/**
+ * Milliseconds until the next watchlist entry clears, or undefined when the
+ * list is empty. The watcher tightens its poll interval as this approaches so
+ * we are first in line rather than up to a full cycle late.
+ */
+export function msUntilNextClear(state = loadState()): number | undefined {
+  const upcoming = Object.values(state.watchlist)
+    .map((e) => e.clearsAt - Date.now())
+    .filter((ms) => ms > 0);
+  return upcoming.length ? Math.min(...upcoming) : undefined;
 }
 
 /** Test hook. */

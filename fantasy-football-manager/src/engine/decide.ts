@@ -13,7 +13,8 @@ import { chooseDropForAdd, type DropCandidate } from './roster.js';
 import { evaluateClaim, rankClaims, type ClaimEvaluation } from './waiver.js';
 import { round2 } from './scoring.js';
 import { addDrop, placeWaiverClaim, type WriteOutcome } from '../yahoo/write.js';
-import { movesInLastDay, recordMove, recordPendingClaim } from '../store/state.js';
+import { movesInLastDay, recordMove, recordPendingClaim, addToWatchlist } from '../store/state.js';
+import { clearTimeFor } from './claims.js';
 import { invalidateContext } from './context.js';
 import { logger } from '../util/log.js';
 
@@ -115,7 +116,28 @@ export function planMoves(ctx: DecisionContext, signals: RoleSignal[] = []): Pla
       expectedGamesOfUse: expectedGames(player, ctx),
     });
 
-    if (evaluation.recommendation === 'skip' || evaluation.recommendation === 'wait_for_free_agency') {
+    if (evaluation.recommendation === 'wait_for_free_agency') {
+      // "Wait" is only a strategy if we actually show up when he clears.
+      // Otherwise it is just a decision to lose him to a more attentive manager.
+      const clearsAt = clearTimeFor(player, ctx.strategy.execution.waiverProcessingHour);
+      addToWatchlist({
+        playerKey: player.playerKey,
+        playerName: player.name,
+        position: valuation.position,
+        clearsAt: clearsAt ?? Date.now(),
+        valueAdded: round2(pairing.valueAdded),
+        reason: evaluation.reasons.join('; '),
+      });
+      rejected.push({
+        name: player.name,
+        reason: `${evaluation.reasons.join('; ')} — watchlisted for ${
+          clearsAt ? new Date(clearsAt).toLocaleString() : 'immediate pickup'
+        }`,
+      });
+      continue;
+    }
+
+    if (evaluation.recommendation === 'skip') {
       rejected.push({ name: player.name, reason: evaluation.reasons.join('; ') });
       continue;
     }

@@ -23,13 +23,17 @@ import {
 } from '../yahoo/read.js';
 import { addDrop, dropPlayer, placeWaiverClaim, cancelWaiverClaim, setClaimPriority, setLineup, proposeTrade, respondToTrade } from '../yahoo/write.js';
 import { buildContext } from '../engine/context.js';
+import { optimiseLineup, changedSlotsOnly, lockedTeamsFromGames } from '../engine/lineup.js';
+import { reconcileClaims, clearTimeFor, hoursUntilClear } from '../engine/claims.js';
+import { generateTradeIdeas } from '../engine/trades.js';
+import { addToWatchlist, removeFromWatchlist } from '../store/state.js';
 import { planMoves, executePlan } from '../engine/decide.js';
 import { evaluateClaim, priorityOptionValue } from '../engine/waiver.js';
 import { explainScore } from '../engine/scoring.js';
 import { requestApproval, listApprovals } from '../store/approvals.js';
 import { loadState, movesInLastDay } from '../store/state.js';
 import { hasTokens } from '../yahoo/oauth.js';
-import { getNews, getInjuries } from '../espn/api.js';
+import { getNews, getInjuries, getScoreboard as getEspnScoreboard } from '../espn/api.js';
 import { env } from '../config.js';
 import { logger } from '../util/log.js';
 
@@ -502,6 +506,181 @@ server.registerTool(
     if (plan.blockedBy) return { plan, executed: [], note: plan.blockedBy };
     const results = await executePlan(ctx, plan);
     return { plan, executed: results };
+  }),
+);
+
+server.registerTool(
+  'optimise_lineup',
+  {
+    title: 'Optimise the starting lineup',
+    description:
+      'Compute the best legal starting lineup under league scoring and report which players should move. ' +
+      'Solved exactly rather than greedily, so flex slots cannot strand a dedicated slot. ' +
+      'Set apply=true to actually write it. Lineup changes cost nothing and spend no waiver priority.',
+    inputSchema: {
+      ...leagueArg,
+      week: z.number().int().optional(),
+      apply: z.boolean().optional().describe('Write the lineup to Yahoo. Defaults to false (report only).'),
+    },
+  },
+  tool(async (a: { leagueKey?: string; week?: number; apply?: boolean }) => {
+    const ctx = await buildContext({ leagueKey: a.leagueKey, force: true, skipRivalRosters: true });
+    let lockedTeams = new Set<string>();
+    try {
+      lockedTeams = lockedTeamsFromGames(await getEspnScoreboard());
+    } catch { /* assume nothing locked */ }
+
+    const plan = optimiseLineup({
+      roster: ctx.roster,
+      valuations: ctx.valuations,
+      settings: ctx.settings,
+      week: a.week ?? ctx.currentWeek,
+      lockedTeams,
+    });
+
+    if (!a.apply || !plan.changes.length) return { plan, applied: false };
+    const outcome = await setLineup({
+      teamKey: ctx.myTeam.teamKey,
+      week: a.week ?? ctx.currentWeek,
+      slots: changedSlotsOnly(plan),
+    });
+    return { plan, applied: true, outcome };
+  }),
+);
+
+server.registerTool(
+  'reconcile_claims',
+  {
+    title: 'Check how filed waiver claims resolved',
+    description:
+      'Determine whether each pending claim won or lost by checking where the player ended up, and re-read ' +
+      'waiver priority if anything landed. Winning a claim drops you to the back of the queue, so this keeps ' +
+      'every later decision from being computed against a stale priority number.',
+    inputSchema: leagueArg,
+  },
+  tool(async ({ leagueKey }: { leagueKey?: string }) => {
+    const ctx = await buildContext({ leagueKey, skipRivalRosters: true });
+    return reconcileClaims({ leagueKey: ctx.leagueKey, myTeamKey: ctx.myTeam.teamKey });
+  }),
+);
+
+server.registerTool(
+  'get_watchlist',
+  {
+    title: 'Free-agent watchlist',
+    description:
+      'Players we deliberately declined to claim, waiting to grab them free once waivers clear. Includes when ' +
+      'each clears and how many pickup attempts have been made.',
+    inputSchema: {},
+  },
+  tool(async () => {
+    const state = loadState();
+    return Object.values(state.watchlist).map((e) => ({
+      ...e,
+      clearsAtIso: new Date(e.clearsAt).toISOString(),
+      hoursUntilClear: Math.round(((e.clearsAt - Date.now()) / 3_600_000) * 10) / 10,
+    }));
+  }),
+);
+
+server.registerTool(
+  'watch_player',
+  {
+    title: 'Add a player to the watchlist',
+    description:
+      'Track a player to pick up the moment he clears waivers, without spending priority on a claim.',
+    inputSchema: {
+      ...leagueArg,
+      playerKey: z.string(),
+      reason: z.string().optional(),
+    },
+  },
+  tool(async (a: { leagueKey?: string; playerKey: string; reason?: string }) => {
+    const ctx = await buildContext({ leagueKey: a.leagueKey, skipRivalRosters: true });
+    const [player] = await getPlayersByKeys(ctx.leagueKey, [a.playerKey]);
+    if (!player) throw new Error(`No player found for key ${a.playerKey}`);
+    const clearsAt = clearTimeFor(player, ctx.strategy.execution.waiverProcessingHour) ?? Date.now();
+    addToWatchlist({
+      playerKey: player.playerKey,
+      playerName: player.name,
+      position: player.displayPosition,
+      clearsAt,
+      valueAdded: ctx.valuations.get(player.playerKey)?.projectedPPG ?? 0,
+      reason: a.reason ?? 'manually watchlisted',
+    });
+    return {
+      watching: player.name,
+      clearsAt: new Date(clearsAt).toISOString(),
+      hoursUntilClear: hoursUntilClear(player, ctx.strategy.execution.waiverProcessingHour),
+    };
+  }),
+);
+
+server.registerTool(
+  'unwatch_player',
+  {
+    title: 'Remove a player from the watchlist',
+    description: 'Stop chasing a watchlisted player.',
+    inputSchema: { playerKey: z.string() },
+  },
+  tool(async ({ playerKey }: { playerKey: string }) => {
+    removeFromWatchlist(playerKey);
+    return { removed: playerKey };
+  }),
+);
+
+server.registerTool(
+  'suggest_trades',
+  {
+    title: 'Generate trade ideas',
+    description:
+      'Find swaps that improve my starting lineup where the other manager also gains, based on positional ' +
+      'surplus and need across every roster in the league. Returns ideas only — use request_trade_approval ' +
+      'to escalate one to a human decision. Nothing is sent to Yahoo.',
+    inputSchema: {
+      ...leagueArg,
+      maxIdeas: z.number().int().min(1).max(10).optional(),
+      minGain: z.number().optional().describe('Minimum points per game the deal must add to my lineup.'),
+    },
+  },
+  tool(async (a: { leagueKey?: string; maxIdeas?: number; minGain?: number }) => {
+    const ctx = await buildContext({ leagueKey: a.leagueKey, force: true });
+    const me = ctx.profiles.get(ctx.myTeam.teamKey);
+    if (!me) throw new Error('Could not profile my own roster');
+    const rivals = [...ctx.profiles.values()].filter((p) => p.teamKey !== ctx.myTeam.teamKey);
+
+    const ideas = generateTradeIdeas({
+      me, rivals, valuations: ctx.valuations, strategy: ctx.strategy,
+      maxIdeas: a.maxIdeas, minGain: a.minGain,
+    });
+    return { ideas, note: 'Nothing has been proposed. These are analysis only.' };
+  }),
+);
+
+server.registerTool(
+  'get_team_profiles',
+  {
+    title: 'Positional strength of every team',
+    description:
+      'Surplus and need by position for all teams, which is what makes a trade work: a fourth good running ' +
+      'back is worth far more to a manager starting a replacement-level one than to the team hoarding him.',
+    inputSchema: leagueArg,
+  },
+  tool(async ({ leagueKey }: { leagueKey?: string }) => {
+    const ctx = await buildContext({ leagueKey, force: true });
+    return [...ctx.profiles.values()].map((p) => ({
+      teamKey: p.teamKey,
+      name: p.name,
+      isMe: p.teamKey === ctx.myTeam.teamKey,
+      positions: [...p.strengths.values()].map((s) => ({
+        position: s.position,
+        required: s.required,
+        surplus: s.surplus,
+        weakestStarter: s.weakestStarter,
+        starters: s.starters,
+        depth: s.depth,
+      })),
+    }));
   }),
 );
 

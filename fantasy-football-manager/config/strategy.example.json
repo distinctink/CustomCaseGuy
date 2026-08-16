@@ -15,7 +15,12 @@
     "seasonWeight": 0.4,
     "recentWeight": 0.6,
     "recentWindowGames": 4,
+    "_ownershipWeight": "How much the cold-start prior leans on rostered-% versus Yahoo ranks. 0 = ranks only. Only affects valuation before real production exists.",
     "ownershipWeight": 0.15,
+
+    "_productionRampGames": "Games of real production needed before the preseason prior is dropped entirely. Until then valuation blends the two. Without this the engine is inert in week 1 because nobody has scored yet.",
+    "productionRampGames": 4,
+
     "byeWeekDiscount": 0.0,
 
     "_roleChangeBonus": "Points per game added when news implies this role change. These are the single biggest lever on how aggressively the bot chases handcuffs and backups.",
@@ -79,6 +84,22 @@
     "faRefreshSeconds": 600,
 
     "_autoExecuteTrades": "Locked to false. Setting this true is rejected at load time — trades always require your approval.",
-    "autoExecuteTrades": false
+    "autoExecuteTrades": false,
+
+    "_autoSetLineup": "Set the starting lineup autonomously. Safe to leave on: lineup changes cost nothing, are fully reversible, and spend no waiver priority. This is what benches a player who gets ruled out on a Sunday morning.",
+    "autoSetLineup": true,
+    "minLineupGain": 0.5,
+
+    "_waiverProcessingHour": "Local hour Yahoo processes waivers. Used to work out exactly when a player clears to free agency.",
+    "waiverProcessingHour": 3,
+
+    "_sprint": "When a watchlisted player is about to clear waivers, polling tightens to sprintIntervalSeconds starting sprintWindowMinutes beforehand. Free agents are first-come, so a normal 90s cycle is too slow to win one.",
+    "sprintIntervalSeconds": 15,
+    "sprintWindowMinutes": 10,
+    "maxWatchlistAttempts": 20,
+    "watchlistTtlHours": 96,
+
+    "_suggestTrades": "Generate trade ideas during routine sweeps. Still alert-only — every trade needs your approval.",
+    "suggestTrades": true
   }
 }

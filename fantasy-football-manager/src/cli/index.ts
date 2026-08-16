@@ -20,6 +20,10 @@ import {
 } from '../yahoo/read.js';
 import { getNews, getInjuries, getTeams as getEspnTeams, getScoreboard as getEspnScoreboard } from '../espn/api.js';
 import { buildContext } from '../engine/context.js';
+import { optimiseLineup, changedSlotsOnly, lockedTeamsFromGames } from '../engine/lineup.js';
+import { reconcileClaims } from '../engine/claims.js';
+import { generateTradeIdeas } from '../engine/trades.js';
+import { setLineup } from '../yahoo/write.js';
 import { planMoves, executePlan } from '../engine/decide.js';
 import { priorityOptionValue } from '../engine/waiver.js';
 import { watch, requestStop } from '../watcher/index.js';
@@ -41,6 +45,10 @@ async function main() {
     case 'fa': return cmdFreeAgents(args);
     case 'plan': return cmdPlan(false);
     case 'run': return cmdPlan(true);
+    case 'lineup': return cmdLineup(args);
+    case 'claims': return cmdClaims();
+    case 'watchlist': return cmdWatchlist();
+    case 'trades': return cmdTrades();
     case 'watch': return cmdWatch(args);
     case 'approvals': return cmdApprovals(args);
     case 'log': return cmdLog();
@@ -65,6 +73,10 @@ function cmdHelp() {
   ffm free-agents [POS]   Top available players (optionally by position)
   ffm plan                What the engine would do right now — no writes
   ffm run                 Plan and execute once
+  ffm lineup [--apply]    Best legal lineup, and what to change
+  ffm claims              Reconcile filed waiver claims (won/lost)
+  ffm watchlist           Players waiting to clear waivers
+  ffm trades              Trade ideas — analysis only, nothing is sent
   ffm watch [--once]      Run the persistent watcher
   ffm approvals           List pending trade approvals
   ffm approvals approve <id>
@@ -302,6 +314,135 @@ async function cmdPlan(execute: boolean) {
   for (const r of results) {
     out(r.error ? `FAILED ${r.move.add.name}: ${r.error}` : `${r.outcome?.detail}`);
   }
+}
+
+
+async function cmdLineup(args: string[]) {
+  const apply = args.includes('--apply');
+  const ctx = await buildContext({ force: true, skipRivalRosters: true });
+
+  let lockedTeams = new Set<string>();
+  try {
+    lockedTeams = lockedTeamsFromGames(await getEspnScoreboard());
+  } catch {
+    out('(could not read game states; assuming nothing is locked)');
+  }
+
+  const plan = optimiseLineup({
+    roster: ctx.roster,
+    valuations: ctx.valuations,
+    settings: ctx.settings,
+    week: ctx.currentWeek,
+    lockedTeams,
+  });
+
+  out(`Week ${plan.week} lineup — projected ${plan.projectedPoints} vs current ${plan.currentProjectedPoints} (${plan.gain >= 0 ? '+' : ''}${plan.gain})`);
+  if (plan.lockedOut.length) out(`Locked (game started): ${plan.lockedOut.join(', ')}`);
+  for (const note of plan.notes) out(`! ${note}`);
+  out('');
+
+  if (!plan.changes.length) {
+    out('Lineup is already optimal.');
+    return;
+  }
+
+  for (const c of plan.changes) {
+    out(`${pad(c.name, 26)} ${pad(c.from, 6)} → ${pad(c.to, 6)} ${c.projectedPPG.toFixed(1).padStart(5)}  ${c.reason}`);
+  }
+
+  if (!apply) {
+    out('\nRun `ffm lineup --apply` to write it.');
+    return;
+  }
+  const outcome = await setLineup({
+    teamKey: ctx.myTeam.teamKey,
+    week: ctx.currentWeek,
+    slots: changedSlotsOnly(plan),
+  });
+  out(`\n${outcome.detail}`);
+}
+
+async function cmdClaims() {
+  const state = loadState();
+  const pending = Object.entries(state.pendingClaims);
+
+  if (pending.length) {
+    out('Pending claims:');
+    for (const [key, c] of pending) {
+      out(`  ${c.playerName}  filed ${new Date(c.filedAt).toLocaleString()}  (${key})`);
+    }
+    out('');
+    const ctx = await buildContext({ skipRivalRosters: true });
+    const result = await reconcileClaims({ leagueKey: ctx.leagueKey, myTeamKey: ctx.myTeam.teamKey });
+    for (const w of result.won) out(`WON   ${w.playerName}`);
+    for (const l of result.lost) out(`LOST  ${l.playerName}`);
+    if (result.stillPending.length) out(`${result.stillPending.length} still pending (waivers have not run yet)`);
+    if (result.currentPriority !== undefined) out(`\nWaiver priority is now #${result.currentPriority}`);
+  } else {
+    out('No pending claims.');
+  }
+
+  const outcomes = loadState().claimOutcomes.slice(-10);
+  if (outcomes.length) {
+    out('\nRecent outcomes:');
+    for (const o of outcomes.reverse()) {
+      out(`  ${new Date(o.at).toLocaleString()}  ${o.result.toUpperCase().padEnd(7)} ${o.playerName}`);
+    }
+  }
+}
+
+async function cmdWatchlist() {
+  const state = loadState();
+  const entries = Object.values(state.watchlist);
+  if (!entries.length) {
+    out('Watchlist is empty.');
+    out('\nPlayers land here when the engine decides a waiver claim is not worth');
+    out('burning priority, so it waits and grabs them free once they clear.');
+    return;
+  }
+  out(pad('PLAYER', 26) + pad('POS', 5) + pad('+PPG', 7) + pad('CLEARS IN', 12) + 'TRIES');
+  for (const e of entries.sort((a, b) => a.clearsAt - b.clearsAt)) {
+    const hours = (e.clearsAt - Date.now()) / 3_600_000;
+    out(
+      pad(e.playerName, 26) + pad(e.position, 5) +
+      pad(e.valueAdded.toFixed(1), 7) +
+      pad(hours <= 0 ? 'cleared' : `${hours.toFixed(1)}h`, 12) +
+      String(e.attempts),
+    );
+  }
+}
+
+async function cmdTrades() {
+  const ctx = await buildContext({ force: true });
+  const me = ctx.profiles.get(ctx.myTeam.teamKey);
+  if (!me) {
+    out('Could not profile your roster.');
+    return;
+  }
+  const rivals = [...ctx.profiles.values()].filter((p) => p.teamKey !== ctx.myTeam.teamKey);
+
+  out('Your positional shape:');
+  for (const s of me.strengths.values()) {
+    out(`  ${pad(s.position, 5)} need ${s.required}  have ${s.starters.length + s.depth.length}  ` +
+      `surplus ${s.surplus >= 0 ? '+' : ''}${s.surplus}  weakest starter ${s.weakestStarter.toFixed(1)}`);
+  }
+
+  const ideas = generateTradeIdeas({ me, rivals, valuations: ctx.valuations, strategy: ctx.strategy });
+  out('');
+  if (!ideas.length) {
+    out('No trades found that improve both sides.');
+    return;
+  }
+  for (const idea of ideas) {
+    out(`→ ${idea.theirTeamName}`);
+    out(`  send    ${idea.send.map((p) => `${p.name} (${p.position}, ${p.value.toFixed(1)})`).join(', ')}`);
+    out(`  receive ${idea.receive.map((p) => `${p.name} (${p.position}, ${p.value.toFixed(1)})`).join(', ')}`);
+    out(`  my gain ${idea.myGain} pts/gm, theirs ${idea.theirGain}, acceptance ~${Math.round(idea.acceptability * 100)}%`);
+    out(`  ${idea.rationale}`);
+    out('');
+  }
+  out('Analysis only — nothing has been sent. Use the MCP tool request_trade_approval');
+  out('to escalate one, then `ffm approvals approve <id>`.');
 }
 
 async function cmdWatch(args: string[]) {

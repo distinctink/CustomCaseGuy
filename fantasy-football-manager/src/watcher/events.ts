@@ -10,7 +10,7 @@
 
 import type { InjuryRecord, NewsItem } from '../espn/types.js';
 import { getDepthChart, teamByAbbr, injuryCode } from '../espn/api.js';
-import { matchPlayer, normalizeTeam, type Nameable } from '../util/names.js';
+import { matchPlayer, normalizeTeam, normalizeName, type Nameable } from '../util/names.js';
 import { primaryFantasyPosition } from '../engine/valuation.js';
 import type { RoleSignal } from '../engine/decide.js';
 import type { DecisionContext } from '../engine/context.js';
@@ -155,24 +155,40 @@ export async function beneficiaries(
   season: number,
 ): Promise<RoleSignal[]> {
   if (!event.team) return [];
-  const sidelined = event.status ? SIDELINING.has(event.status) : false;
-  if (!sidelined) return [];
 
   const position = canonicalPosition(event.position);
   if (!position || position === 'K' || position === 'DEF') return [];
+
+  // A player coming back is worth something to *himself*, not to a backup.
+  if (isReturn(event)) {
+    const returning = ctx.available.find(
+      (p) => normalizeTeam(p.team) === event.team && matchesName(p.name, event.subject),
+    );
+    if (!returning) return [];
+    return [{
+      playerKey: returning.playerKey,
+      roleChange: 'returning_from_injury',
+      source: `${event.headline} → ${returning.name} is available again`,
+      injuryStatus: '',
+    }];
+  }
+
+  const sidelined = event.status ? SIDELINING.has(event.status) : false;
+  if (!sidelined) return [];
 
   const sameTeam = ctx.available.filter(
     (p) => normalizeTeam(p.team) === event.team && positionMatches(p, position),
   );
   if (!sameTeam.length) return [];
 
-  const roleChange = roleChangeFor(position);
   const ranked = await rankByDepthChart(sameTeam, event.team, position, season);
 
   // Only the immediate backup gets the promotion bonus; the third-stringer
   // inheriting a committee role is not the same bet.
   const top = ranked[0];
   if (!top) return [];
+
+  const roleChange = roleChangeFor(position, event, ranked.length);
 
   return [
     {
@@ -181,6 +197,16 @@ export async function beneficiaries(
       source: `${event.headline} → ${top.name} is next up at ${position} for ${event.team}`,
     },
   ];
+}
+
+/** News about a player coming back rather than going down. */
+function isReturn(event: MaterialEvent): boolean {
+  if (event.status === '') return /back to active|activated|return/i.test(event.headline);
+  return /\bactivated\b|\breturn(s|ing)? (to practice|from)\b/i.test(event.headline);
+}
+
+function matchesName(a: string, b: string): boolean {
+  return normalizeName(a) === normalizeName(b);
 }
 
 async function rankByDepthChart(
@@ -213,14 +239,24 @@ async function rankByDepthChart(
   }
 }
 
-function roleChangeFor(position: string): string {
-  switch (position) {
-    case 'RB': return 'starter_out_backup_promoted';
-    case 'WR': return 'wr2_to_wr1';
-    case 'TE': return 'te_starter_out';
-    case 'QB': return 'qb_starter_change';
-    default: return 'starter_out_backup_promoted';
+/**
+ * Which role-change bonus applies.
+ *
+ * A backfield that already splits work does not hand the whole job to one man
+ * when the nominal starter goes down, so a crowded depth chart gets the smaller
+ * committee bonus rather than the full promotion.
+ */
+function roleChangeFor(position: string, event: MaterialEvent, contenders: number): string {
+  if (position === 'RB') {
+    // A season-ending designation hands over the whole job even in a crowded
+    // backfield; a week-to-week absence usually just widens the split.
+    if (event.status === 'IR' || event.status === 'PUP') return 'starter_out_backup_promoted';
+    return contenders > 1 ? 'committee_to_bellcow' : 'starter_out_backup_promoted';
   }
+  if (position === 'WR') return 'wr2_to_wr1';
+  if (position === 'TE') return 'te_starter_out';
+  if (position === 'QB') return 'qb_starter_change';
+  return 'starter_out_backup_promoted';
 }
 
 function canonicalPosition(pos: string): string {

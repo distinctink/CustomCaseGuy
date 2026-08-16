@@ -157,6 +157,96 @@ the only thing that matters.
 
 ---
 
+## Cold start
+
+Valuation is normally driven by production, which is a problem in preseason and
+week 1: nobody has scored anything, so every player values at zero, every pickup
+looks like a zero-point upgrade, and the engine sits inert exactly when the wire
+is most volatile.
+
+So it carries a prior. Yahoo publishes each player's overall rank and rostered
+percentage; `engine/baseline.ts` converts those into a *positional* rank across
+the whole player universe — every rostered player plus the wire, because a free
+agent who looks like the best receiver available might be WR55 overall — and
+reads an expected points-per-game off a curve.
+
+The curves are anchored to full PPR and adapted to your actual scoring, so a
+standard-scoring league does not inherit PPR receiver numbers and a 6-point
+passing-TD league values quarterbacks correctly.
+
+Production then takes over gradually rather than flipping:
+
+| Games played | Valuation is |
+|---|---|
+| 0 | entirely the preseason prior |
+| 2 | an even blend |
+| 4+ | entirely real production |
+
+`productionRampGames` controls the crossover.
+
+---
+
+## Lineup optimisation
+
+The highest-frequency decision in fantasy, and the safest thing to hand full
+autonomy: lineup changes cost nothing, are fully reversible, and spend no waiver
+priority. Leaving a player who was ruled out in your starting lineup is the most
+common avoidable way to lose a week.
+
+Slot assignment is solved **exactly** (Hungarian algorithm, `util/assignment.ts`)
+rather than greedily. Greedy filling is genuinely wrong whenever flex slots
+exist: taking the best available player for the flex spot can strand a dedicated
+slot only he was eligible for. At roster sizes the exact solution is instant, so
+there is no reason to approximate.
+
+Players who are Out, on bye, or on IR value at zero through the normal path, so
+they fall to the bench without needing a special case. Players whose game has
+already kicked off are pinned to their current slot — Yahoo rejects moving them,
+and the attempt fails the entire request rather than just that player.
+
+```bash
+ffm lineup            # what should change and why
+ffm lineup --apply    # write it
+```
+
+Turn it off with `autoSetLineup: false` if you would rather set lineups yourself.
+
+---
+
+## Claim reconciliation
+
+Filing a claim and never checking the result leaves the system blind in the way
+that matters most. **If you win, your priority drops to last** — and every
+subsequent claim decision computed against the old number is wrong.
+
+Yahoo does not push results and a processed claim stops appearing as pending, so
+reconciliation works by looking at where the player ended up: on your roster
+(won), owned by a rival (lost), or still on waivers (not processed yet). Winning
+triggers a fresh read of your real priority.
+
+```bash
+ffm claims
+```
+
+---
+
+## The watchlist
+
+This is what makes "wait for free agency" an actual strategy rather than a
+decision to lose the player.
+
+When the engine decides a claim is not worth burning priority, the player goes on
+a watchlist with the exact moment he clears waivers. As that moment approaches
+the watcher **tightens its poll interval from 90 seconds to 15** — free agents
+are first-come, so a normal cycle is too slow to win one — and grabs him the
+instant he is available.
+
+```bash
+ffm watchlist
+```
+
+---
+
 ## Guard rails
 
 Autonomy makes the **drop** side the dangerous half of every transaction. A
@@ -178,7 +268,20 @@ cannot replay last week.
 
 ### Trades
 
-Trades are alert-only, enforced structurally rather than by convention:
+The system now generates trade ideas as well as reacting to incoming offers. It
+profiles every roster in the league for positional surplus and need — a fourth
+good running back is worth far more to a manager starting a replacement-level
+one than to the team hoarding him — and looks for swaps where **both** lineups
+improve. A proposal the other manager would obviously reject is worse than no
+proposal, so a candidate only survives if it helps them too, judged by the same
+model.
+
+```bash
+ffm trades    # analysis only, nothing is sent
+```
+
+Everything about trades is alert-only, enforced structurally rather than by
+convention:
 
 1. A trade proposal files an **approval request** and stops.
 2. You get an alert (console, `data/alerts.log`, and your webhook if set).
@@ -205,6 +308,16 @@ npm run watch             The persistent loop
 npm run watch -- --once   One cycle then exit (good for cron)
 npm run approvals         Pending trade decisions
 npm test                  Unit tests
+```
+
+Also available through the `ffm` binary after `npm run build`:
+
+```
+ffm lineup [--apply]      Best legal lineup, and what to change
+ffm claims                Reconcile filed waiver claims
+ffm watchlist             Players waiting to clear waivers
+ffm trades                Trade ideas
+ffm log                   Every transaction, with the reasoning recorded at the time
 ```
 
 `ffm run` executes a plan once; `ffm log` shows every transaction the system has
@@ -238,7 +351,11 @@ npm run build
 `get_waiver_priority`, `get_transactions`, `get_matchup`, `get_standings`,
 `list_teams`, `get_nfl_news`, `get_nfl_injuries`, `get_activity_log`
 
-**Decide** — `recommend_moves`, `evaluate_pickup`, `analyse_roster`
+**Decide** — `recommend_moves`, `evaluate_pickup`, `analyse_roster`,
+`optimise_lineup`, `suggest_trades`, `get_team_profiles`
+
+**Waiver lifecycle** — `reconcile_claims`, `get_watchlist`, `watch_player`,
+`unwatch_player`
 
 **Write** — `add_drop_player`, `drop_player`, `place_waiver_claim`,
 `cancel_waiver_claim`, `set_claim_priority`, `set_lineup`,
@@ -298,6 +415,15 @@ whatever else your commissioner set up.
 - **Games played is approximated** from the current week, since Yahoo does not
   expose it directly. Players who missed time are slightly undervalued on the
   season component; the trailing-month component compensates.
+- **The cold-start curves are anchored to typical output**, not to your league's
+  history. They are deliberately conservative at the top — overpaying for a
+  rank-1 projection is how a bot talks itself into burning waiver priority in
+  week 1. Tune `roleChangeBonus` and `minValueAdded` if it feels too eager or too
+  passive before real production accumulates.
+- **Waiver clear times come from Yahoo's `waiver_date`**, which is a calendar
+  date with no time attached. The exact moment is inferred from
+  `waiverProcessingHour` (default 3am local). If your league processes at a
+  different hour, set it, or the sprint window will open at the wrong time.
 - **Depth-chart lookups cost one request per player** (ESPN returns `$ref`
   links), so they run only when a news item actually implicates a team, and
   results are cached for the process lifetime.

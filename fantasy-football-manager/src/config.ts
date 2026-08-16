@@ -62,8 +62,17 @@ export interface StrategyConfig {
     recentWeight: number;
     /** Games in the "recent form" window. */
     recentWindowGames: number;
-    /** Rostered-% is a crowd signal; this scales how much we trust it. */
+    /**
+     * How much the cold-start prior leans on rostered-% versus Yahoo's ranks.
+     * 0 = ranks only. Only affects valuation before real production exists.
+     */
     ownershipWeight: number;
+    /**
+     * Games of production needed before we stop leaning on the preseason prior.
+     * Until then, valuation blends the two — without this the engine is inert
+     * in week 1 because nobody has scored anything yet.
+     */
+    productionRampGames: number;
     /** Points added by an expected role change (e.g. promoted to RB1). */
     roleChangeBonus: Record<string, number>;
     /** Multiplier applied to a player whose team is on bye this week. */
@@ -120,6 +129,25 @@ export interface StrategyConfig {
     faRefreshSeconds: number;
     /** Trades are alert-only. Kept explicit so it cannot be flipped by accident. */
     autoExecuteTrades: false;
+    /**
+     * Set the starting lineup autonomously. Safe to leave on: lineup changes
+     * cost nothing, are fully reversible, and spend no waiver priority.
+     */
+    autoSetLineup: boolean;
+    /** Only rewrite the lineup when it gains at least this many points. */
+    minLineupGain: number;
+    /** Hour of the local day Yahoo processes waivers, for clear-time maths. */
+    waiverProcessingHour: number;
+    /** Poll this often when a watchlist player is about to clear waivers. */
+    sprintIntervalSeconds: number;
+    /** How far ahead of a clear time to start sprint polling. */
+    sprintWindowMinutes: number;
+    /** Give up chasing a cleared player after this many attempts. */
+    maxWatchlistAttempts: number;
+    /** Drop watchlist entries older than this. */
+    watchlistTtlHours: number;
+    /** Generate trade ideas (still alert-only) during routine sweeps. */
+    suggestTrades: boolean;
   };
 }
 
@@ -133,6 +161,7 @@ export const DEFAULT_STRATEGY: StrategyConfig = {
     recentWeight: 0.6,
     recentWindowGames: 4,
     ownershipWeight: 0.15,
+    productionRampGames: 4,
     roleChangeBonus: {
       // Points-per-game added when news implies this role change.
       starter_out_backup_promoted: 6.0,
@@ -177,6 +206,14 @@ export const DEFAULT_STRATEGY: StrategyConfig = {
     pollIntervalSeconds: 90,
     faRefreshSeconds: 600,
     autoExecuteTrades: false,
+    autoSetLineup: true,
+    minLineupGain: 0.5,
+    waiverProcessingHour: 3,
+    sprintIntervalSeconds: 15,
+    sprintWindowMinutes: 10,
+    maxWatchlistAttempts: 20,
+    watchlistTtlHours: 96,
+    suggestTrades: true,
   },
 };
 
