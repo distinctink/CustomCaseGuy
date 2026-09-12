@@ -1,0 +1,4 @@
+# Python virtual environment (recreate with the steps in README.md)
+.venv/
+__pycache__/
+*.pyc
