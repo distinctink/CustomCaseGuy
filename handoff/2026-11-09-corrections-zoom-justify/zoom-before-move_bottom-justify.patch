@@ -1,0 +1,445 @@
+--- a/corrections.py
++++ b/corrections.py
+@@ -137,32 +137,68 @@
+ PIXELS = re.compile(r"^(\d{1,4})(px|pixels?)?$")
+ PERCENT = re.compile(r"^(\d{1,3})%$")
+ 
++# "bottom justify", "justify to the bottom", "align it to the bottom", "bottom
++# aligned". Added 2026-11-09 for 17E-M-MS|296-wide. On a full-bleed design it puts
++# the BOTTOM OF THE SUBJECT on the bottom of the case's FLAT FACE (where the face
++# starts to curve into the edge), not on the bottom of the print canvas -- the
++# canvas runs on round the curve, and art sitting there reads as cut off.
++JUSTIFY = re.compile(
++    r"\b(bottom|top|left|right)[\s-]*(justif(?:y|ied)|align(?:ed)?)\b"
++    r"|\b(?:justify|align)(?:\s+(?:it|the\s+art|art|the\s+design))?"
++    r"(?:\s+(?:to|on|at|with))?(?:\s+the)?\s+(bottom|top|left|right)\b")
++
++# A size verb owns a number written right after it: "zoom in 10%" is a 10% zoom,
++# and that 10% must NOT then be read as the size of the next move. Until
++# 2026-11-09 it was: "zoom in 10% move down 3%" came out as 12% bigger (the canned
++# step, ignoring his 10) and 205px DOWN (10% of 2051, stolen from the zoom, with
++# his 3% ignored because it sat AFTER the word "down").
++STOP_WORDS = {"and", "then", "also", "plus", "but", "move", "shift", "zoom", "make",
++              "go", "push", "nudge", "scale", "bump"}
++
+ 
+ def _tokens(text):
+     return re.findall(r"[a-z0-9']+%?|\d+%", (text or "").lower())
+ 
+ 
+-def _magnitude(words, i):
+-    """How big a step the direction word at index i asks for, as a multiplier.
+-
+-    Looks at the three tokens before it. An explicit "120px" or "10%" wins outright.
+-    A diminutive beats an intensifier, because "a little further right" is a LITTLE
+-    further -- that exact phrase is one of the real replies, and reading "further"
+-    as the operative word would have overshot.
++def _explicit(w):
++    m = PIXELS.fullmatch(w)
++    if m and m.group(2):
++        return ("px", int(m.group(1)))
++    m = PERCENT.fullmatch(w)
++    if m:
++        return ("frac", int(m.group(1)) / 100.0)
++    return None
++
++
++def _magnitude(words, i, used=frozenset(), after=0):
++    """How big a step the word at index i asks for, as a multiplier.
++
++    Looks at the three tokens before it and, when `after` is set, that many tokens
++    after it (stopping at the next verb or direction), skipping any token in `used`
++    -- a number some other instruction already owns. An explicit "120px" or "10%"
++    wins outright, the nearest one first. A diminutive beats an intensifier,
++    because "a little further right" is a LITTLE further -- that exact phrase is
++    one of the real replies, and reading "further" as the operative word would
++    have overshot.
+     """
+-    window = words[max(0, i - 3):i]
+-    for w in window:
+-        m = PIXELS.fullmatch(w)
+-        if m and m.group(2):
+-            return ("px", int(m.group(1)))
+-        m = PERCENT.fullmatch(w)
+-        if m:
+-            return ("frac", int(m.group(1)) / 100.0)
++    before = [j for j in range(max(0, i - 3), i) if j not in used]
++    ahead = []
++    for j in range(i + 1, min(len(words), i + 1 + after)):
++        if words[j] in STOP_WORDS or words[j] in DIRECTIONS:
++            break
++        if j not in used:
++            ahead.append(j)
++    # nearest explicit number wins: right after the word, then right before it
++    for j in ahead + before[::-1]:
++        hit = _explicit(words[j])
++        if hit:
++            return hit + (j,)
++    window = [words[j] for j in before]
+     if any(w in SMALL_WORDS for w in window):
+-        return ("mult", SMALL)
++        return ("mult", SMALL, None)
+     if any(w in BIG_WORDS for w in window):
+-        return ("mult", BIG)
+-    return ("mult", 1.0)
++        return ("mult", BIG, None)
++    return ("mult", 1.0, None)
+ 
+ 
+ def parse_correction(text):
+@@ -189,14 +225,48 @@
+         return out
+ 
+     words = _tokens(low)
++    used = set()                   # token indices some instruction already owns
++
++    def _span(m):
++        return range(len(_tokens(low[:m.start()])), len(_tokens(low[:m.end()])))
++
++    # ---- size first, so it claims its own number before any move can take it
++    scale = 1.0
++    if BIGGER.search(low) or SMALLER.search(low):
++        grow = bool(BIGGER.search(low))
++        hit = (BIGGER if grow else SMALLER).search(low)
++        span = _span(hit)
++        used.update(span)
++        kind, amount, owned = _magnitude(words, span[-1] if len(span) else 0,
++                                         used, after=2)
++        if owned is not None:
++            used.add(owned)
++        if kind == "frac":
++            scale = (1 + amount) if grow else max(0.05, 1 - amount)
++        else:
++            step = 0.12 * (amount if kind == "mult" else 1.0)
++            scale = (1 + step) if grow else 1 / (1 + step)
++        out["reasons"].append(("bigger" if grow else "smaller") + f" (x{scale:.2f})")
++    out["scale"] = scale
++
++    # ---- justify: an absolute placement, not a relative nudge
++    out["justify"] = None
++    jm = JUSTIFY.search(low)
++    if jm:
++        out["justify"] = jm.group(1) or jm.group(3)
++        used.update(_span(jm))     # "right justify" is not also a move right
++        out["reasons"].append(f"{out['justify']} justify")
++
+     dx = dy = None
+     for i, w in enumerate(words):
+-        if w not in DIRECTIONS:
++        if w not in DIRECTIONS or i in used:
+             continue
+         if i and words[i - 1] in NOT_A_DIRECTION_AFTER:
+             continue                      # "looks right", "not right", "that's right"
+         hx, hy = DIRECTIONS[w]
+-        kind, amount = _magnitude(words, i)
++        kind, amount, owned = _magnitude(words, i, used, after=2)
++        if owned is not None:
++            used.add(owned)
+         step = ("px", amount * (hx or hy)) if kind == "px" else \
+                ("frac", (amount if kind == "frac" else amount * STEP) * (hx or hy))
+         if hx:
+@@ -205,20 +275,17 @@
+             dy = step if dy is None else dy
+         out["reasons"].append(f"{w} ({kind} {amount:g})")
+ 
+-    scale = 1.0
+-    if BIGGER.search(low) or SMALLER.search(low):
+-        grow = bool(BIGGER.search(low))
+-        hit = (BIGGER if grow else SMALLER).search(low)
+-        mag = _magnitude(words, len(_tokens(low[:hit.start()])))[1]
+-        if not isinstance(mag, float):
+-            mag = 1.0
+-        step = 0.12 * mag
+-        scale = (1 + step) if grow else 1 / (1 + step)
+-        out["reasons"].append(("bigger" if grow else "smaller") + f" (x{scale:.2f})")
+-    out["scale"] = scale
++    # A justify sets that axis outright, so a move on the same axis in the same
++    # breath would fight it. The justify wins; say so rather than drop it silently.
++    if out["justify"] in ("top", "bottom") and dy is not None:
++        dy = None
++        out["reasons"].append("vertical move ignored: justify sets the height")
++    if out["justify"] in ("left", "right") and dx is not None:
++        dx = None
++        out["reasons"].append("sideways move ignored: justify sets the side")
+ 
+     out["dx"], out["dy"] = dx, dy
+-    moved = dx is not None or dy is not None
++    moved = dx is not None or dy is not None or out["justify"] is not None
+     if moved and scale != 1.0:
+         out["kind"] = "nudge+resize"
+     elif moved:
+@@ -244,9 +311,12 @@
+         px = step[1] if step[0] == "px" else (step[1] * (span or 1000))
+         bits.append(f"{abs(round(px))}px {pos if px > 0 else neg}")
+     if intent["scale"] != 1.0:
+-        bits.append(f"{round(abs(1 - intent['scale']) * 100)}% "
+-                    f"{'bigger' if intent['scale'] > 1 else 'smaller'}")
+-    return " and ".join(bits) if bits else "no measurable change"
++        # zoom FIRST in the sentence, because it is applied first
++        bits.insert(0, f"{round(abs(1 - intent['scale']) * 100)}% "
++                       f"{'bigger' if intent['scale'] > 1 else 'smaller'}")
++    if intent.get("justify"):
++        bits.append(f"{intent['justify']}-justified to the flat face")
++    return ", then ".join(bits) if bits else "no measurable change"
+ 
+ 
+ # ============================================================================
+@@ -415,7 +485,7 @@
+         scale = float(row.get("art_scale") or 1.0) * intent["scale"]
+         try:
+             options, prefit, notes, got = art_restage.restage(
+-                row, catalog, dx, dy, scale)
++                row, catalog, dx, dy, scale, justify=intent.get("justify"))
+         except art_restage.CannotRestage as e:
+             slug = file_for_code(
+                 f"casestry-art-{combo.replace('|', '-').lower()}",
+@@ -433,11 +503,16 @@
+         # whenever the art hits the edge of the print area -- and they did, on the
+         # very first live tap.
+         dx, dy = int(got["dx"]), int(got["dy"])
+-        moved = " and ".join(
+-            [f"{abs(v)}px {p if v > 0 else n}"
+-             for v, p, n in ((dx, "right", "left"), (dy, "down", "up")) if v]
+-            + ([f"{round(abs(1 - scale) * 100)}% "
+-                f"{'bigger' if scale > 1 else 'smaller'}"] if abs(scale - 1) > .005 else []))
++        # Zoom is listed first because it is APPLIED first: the crop is tightened
++        # about its centre, and only then moved. A move in px means px on the
++        # finished print, whatever the zoom.
++        moved = ", then ".join(
++            ([f"{round(abs(1 - scale) * 100)}% "
++              f"{'bigger' if scale > 1 else 'smaller'}"] if abs(scale - 1) > .005 else [])
++            + [f"{abs(v)}px {p if v > 0 else n}"
++               for v, p, n in ((dx, "right", "left"), (dy, "down", "up")) if v]
++            + ([f"{intent['justify']}-justified to the flat face"]
++               if intent.get("justify") else []))
+         headline = (f"Moved it {moved} from where it started."
+                     if moved else
+                     "It is already as far that way as the print area allows, so "
+@@ -607,6 +682,13 @@
+     ("wrong design on this case", "wrong_art", 0, 0),
+     ("the image is blank", "resend_preview", 0, 0),
+     ("what is this", "unclear", 0, 0),
++    # 2026-11-09, 17E-M-MS|296-wide, his real reply: the 10% is the zoom and the
++    # 3% is the move. It used to read as 12% bigger and 205px down.
++    ("zoom in 10% move down 3%", "nudge+resize", 0, +1),
++    ("bottom justify", "nudge", 0, 0),
++    ("zoom in 10% and bottom justify", "nudge+resize", 0, 0),
++    ("justify it to the bottom", "nudge", 0, 0),
++    ("right justify", "nudge", 0, 0),
+ ]
+ 
+ 
+@@ -629,6 +711,19 @@
+     bad += 0 if cal else 1
+     print(f"{'PASS' if cal else 'FAIL'}  calibration against the hand fix: "
+           f"dx={dx} (hand: 25), dy={dy} (hand: 120)")
++    # numbers belong to the instruction they sit next to
++    g = parse_correction("zoom in 10% move down 3%")
++    ok = abs(g["scale"] - 1.10) < 1e-9 and g["dy"] == ("frac", 0.03) and g["dx"] is None
++    bad += 0 if ok else 1
++    print(f"{'PASS' if ok else 'FAIL'}  'zoom in 10% move down 3%' -> scale "
++          f"{g['scale']:.2f} (want 1.10), dy {g['dy']} (want frac 0.03)")
++    for text, edge in (("bottom justify", "bottom"), ("zoom in 10% and bottom justify",
++                       "bottom"), ("justify it to the bottom", "bottom"),
++                       ("right justify", "right"), ("move it right", None)):
++        g = parse_correction(text)
++        ok = g["justify"] == edge and (edge != "right" or g["dx"] is None)
++        bad += 0 if ok else 1
++        print(f"{'PASS' if ok else 'FAIL'}  justify {text!r:36} -> {g['justify']}")
+     print("\nALL PASS" if not bad else f"\n{bad} FAILED")
+     sys.exit(1 if bad else 0)
+ 
+--- a/art_restage.py
++++ b/art_restage.py
+@@ -57,6 +57,49 @@
+     """Plain-English reason this particular art cannot take this correction."""
+ 
+ 
++# WHERE THE FLAT FACE ENDS, as a fraction of print height from the top. Below this
++# line the case curves round into its edge, so art "bottom-justified" to the print
++# canvas looks cut off. Keyed on the blank's model prefix (the part of item_sku
++# before the first "-", plus the next part when it is the MagSafe M).
++# 17E-M-MS calibrated 2026-11-09 from Daren's hand crop of 296-wide (box
++# 838,240,3257,3964 on the 4096 master, zoom 110%): the subject bottom lands at
++# 0.9088 of print height (as measured by subject_bottom). Any blank not listed is refused for a justify rather than
++# guessed at -- add it here once one hand crop has been approved.
++FLAT_FACE_BOTTOM = {
++    "17E-M": 0.9088,
++}
++
++
++def _flat_bottom(blank):
++    parts = (blank or "").upper().split("-")
++    for k in ("-".join(parts[:2]), parts[0]):
++        if k in FLAT_FACE_BOTTOM:
++            return FLAT_FACE_BOTTOM[k]
++    return None
++
++
++def subject_bottom(img, x0=None, x1=None):
++    """Lowest row of the SUBJECT in a full-bleed master, in master pixels.
++
++    Full-bleed masters are a subject on a soft painted ground, so the subject is
++    whatever differs from a heavily blurred copy of the image. Measured at 1024px
++    for speed; a row counts once more than 1% of it (between x0 and x1, the
++    columns the crop will keep) is subject."""
++    from PIL import ImageFilter
++    import numpy as np
++    W, H = img.size
++    small = img.convert("RGB").resize((1024, 1024))
++    a = np.asarray(small).astype(float)
++    bg = np.asarray(small.filter(ImageFilter.GaussianBlur(60))).astype(float)
++    diff = np.sqrt(((a - bg) ** 2).sum(2)) > 35
++    c0 = int((x0 or 0) * 1024 / W)
++    c1 = max(c0 + 1, int((x1 if x1 is not None else W) * 1024 / W))
++    rows = np.where(diff[:, c0:c1].mean(1) > 0.01)[0]
++    if not len(rows):
++        return None
++    return (rows.max() + 1) * H / 1024.0
++
++
+ def _sgn(v):
+     v = int(round(v))
+     return f"m{abs(v)}" if v < 0 else str(v)
+@@ -147,7 +190,8 @@
+     return cs.TOP_ANCHOR_MODELS
+ 
+ 
+-def recut_jpeg(row, catalog, opt, key, pw, ph, dx, dy, scale, notes, achieved=None):
++def recut_jpeg(row, catalog, opt, key, pw, ph, dx, dy, scale, notes, achieved=None,
++               justify=None):
+     """Re-cut a full-bleed design from its master with the crop window shifted."""
+     from PIL import Image
+     import casestry_sync as cs
+@@ -160,42 +204,92 @@
+             f"this one is a full-bleed design and I cannot find the master file for "
+             f"{design} on the drive, so there is nothing to re-cut from. Moving the "
+             f"staged file instead would slide a blank edge into the print")
+-    if abs(scale - 1.0) > 0.005:
+-        notes.append("(Size changes do not apply to a full-bleed design -- it is "
+-                     "printed edge to edge either way -- so only the position moved.)")
+-
+-    w, h = Image.open(src).size
+-    fit = max(pw / w, ph / h)
+-    slack_x, slack_y = w * fit - pw, h * fit - ph
+-    if dx and slack_x < 2:
++    # ORDER OF OPERATIONS (fixed 2026-11-09, 17E-M-MS|296-wide): ZOOM FIRST, THEN
++    # MOVE. Zoom tightens the crop window about its own default position, which is
++    # what CREATES spare image round the edges; only then is the window moved,
++    # with the move measured in pixels of the finished print. Until this date zoom
++    # was dropped on full-bleed art with a note, the no-slack check ran on the
++    # UNZOOMED fit, and "zoom in 10% move down 3%" was refused as impossible --
++    # when the 10% zoom alone makes 205px of room top to bottom.
++    zoom = float(scale or 1.0)
++    if zoom < 0.995:
++        raise CannotRestage(
++            "a full-bleed design already fills the case edge to edge at its smallest "
++            "size, so making it smaller would leave a blank border")
++    zoom = max(zoom, 1.0)
++
++    im = Image.open(src)
++    w, h = im.size
++    fit = max(pw / w, ph / h) * zoom           # master px -> print px
++    ww, wh = pw / fit, ph / fit                # crop window, in master px
++    sx, sy = w - ww, h - wh                    # spare master image, in master px
++    if dx and sx * fit < 2:
+         raise CannotRestage(
+             f"the {design} master is exactly as wide as this case's print area once "
+-            f"it is scaled to fit, so there is no spare image to slide sideways into")
+-    if dy and slack_y < 2:
++            f"it is scaled to fit, so there is no spare image to slide sideways into"
++            + ("" if zoom > 1 else " (zooming in first would make some)"))
++    if (dy or justify) and sy * fit < 2:
+         raise CannotRestage(
+             f"the {design} master is exactly as tall as this case's print area once "
+-            f"it is scaled to fit, so there is no spare image to slide up or down")
++            f"it is scaled to fit, so there is no spare image to slide up or down"
++            + ("" if zoom > 1 else " (zooming in first would make some)"))
+ 
++    # 1. zoom: the window's default spot, AFTER the zoom
+     cy0 = _cy_default(opt.get("label"), blank, art)
+-    # Moving the ART right means moving the CROP WINDOW left.
+-    cx = 0.5 - (dx / slack_x if slack_x else 0)
+-    cy = cy0 - (dy / slack_y if slack_y else 0)
+-    if not 0.0 <= cx <= 1.0 or not 0.0 <= cy <= 1.0:
++    ref_x, ref_y = 0.5 * sx, cy0 * sy
++    x0, y0 = ref_x, ref_y
++    # 2. justify, an absolute placement on its axis
++    if justify:
++        if justify != "bottom":
++            raise CannotRestage(
++                f"only BOTTOM justify is calibrated so far; I do not know where the "
++                f"flat face of this case ends on the {justify}")
++        flat = _flat_bottom(blank)
++        if flat is None:
++            raise CannotRestage(
++                f"I do not know where the flat face ends on {blank} yet (it is not in "
++                f"art_restage.FLAT_FACE_BOTTOM), so I cannot bottom-justify on it")
++        yb = subject_bottom(im, x0, x0 + ww)
++        if yb is None:
++            raise CannotRestage(f"I cannot find the subject in the {design} master")
++        y0 = yb - flat * ph / fit
++    # 3. move, in finished-print px. Moving the ART down moves the WINDOW up.
++    x0 -= dx / fit
++    y0 -= dy / fit
++    if not (0 <= x0 <= sx and 0 <= y0 <= sy):
+         notes.append("(It ran out of master image, so it has gone as far that way as "
+                      "the artwork allows.)")
+-        cx, cy = min(max(cx, 0.0), 1.0), min(max(cy, 0.0), 1.0)
++        x0, y0 = min(max(x0, 0.0), sx), min(max(y0, 0.0), sy)
+     if achieved is not None:
+-        achieved["dx"] = round((0.5 - cx) * slack_x) if slack_x else 0
+-        achieved["dy"] = round((cy0 - cy) * slack_y) if slack_y else 0
+-    try:
+-        return cs.pattern_print_jpeg(src, key, pw, ph, blank, cy=cy, cx=cx)
+-    except cs.Flag as e:
+-        raise CannotRestage(str(e)) from e
++        achieved["dx"] = round((ref_x - x0) * fit)
++        achieved["dy"] = round((ref_y - y0) * fit)
++
++    if abs(zoom - 1.0) <= 0.005 and not justify:
++        # unchanged path: the one verified against 295/165/277-wide on 2026-10-18
++        cx = x0 / sx if sx else 0.5
++        cy = y0 / sy if sy else cy0
++        try:
++            return cs.pattern_print_jpeg(src, key, pw, ph, blank, cy=cy, cx=cx)
++        except cs.Flag as e:
++            raise CannotRestage(str(e)) from e
++
++    if ww < pw / 1.02:
++        raise CannotRestage(
++            f"zoomed that far the {design} master would be stretched "
++            f"{pw / ww:.2f}x to fill the print, and anything over 1.02x prints soft")
++    box = (x0, y0, x0 + ww, y0 + wh)
++    out = im.convert("RGB").resize((pw, ph), Image.LANCZOS, box=box)
++    os.makedirs(cs.WORK, exist_ok=True)
++    path = os.path.join(cs.WORK, key)
++    out.save(path, "JPEG", quality=95)
++    log_line(LOG, f"recut {design} for {blank}: zoom {zoom:.3f}, box "
++                  f"{tuple(round(v) for v in box)} -> {pw}x{ph}")
++    return path
+ 
+ 
+ # -------------------------------------------------------------------- public --
+ 
+-def restage(row, catalog, dx, dy, scale):
++def restage(row, catalog, dx, dy, scale, justify=None):
+     """Build every option again with the cumulative correction applied.
+ 
+     Returns (options, prefit, notes, achieved). `prefit` is True when the rebuild
+@@ -222,11 +316,14 @@
+         # and no key ever claims a move the file does not contain.
+         tmp = "_building-" + variant_key(url, dx, dy, scale)
+         if url.lower().endswith(".png"):
++            if justify:
++                raise CannotRestage("justify is only built for full-bleed designs so "
++                                    "far; a clear-case design still moves by nudges")
+             local = translate_png(url, tmp, dx, dy, scale, notes, achieved)
+             ctype = "image/png"
+         else:
+             local = recut_jpeg(row, catalog, opt, tmp, pw, ph, dx, dy, scale, notes,
+-                               achieved)
++                               achieved, justify=justify)
+             ctype = "image/jpeg"
+             prefit = True       # a re-cut file is exactly print_specs by construction
+         key = variant_key(url, achieved["dx"], achieved["dy"], scale)
