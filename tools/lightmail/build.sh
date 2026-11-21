@@ -10,8 +10,8 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 echo "Compiling..."
 swiftc -O -swift-version 5 -target arm64-apple-macos14.0 \
-  -framework Cocoa -framework WebKit \
-  main.swift -o "$APP/Contents/MacOS/LightMail"
+  -framework SwiftUI -framework WebKit -framework Network -framework Security \
+  -parse-as-library LightMail.swift -o "$APP/Contents/MacOS/LightMail"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
